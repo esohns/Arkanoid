@@ -46,8 +46,8 @@ Game::Game (int argc, char** argv)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initSystems, aborting\n")));
-    exit (1);
-  }
+    ACE_OS::exit (1);
+  } // end IF
 
   std::string path_base = buffer;
   path_base += ACE_DIRECTORY_SEPARATOR_STR;
@@ -63,8 +63,8 @@ Game::Game (int argc, char** argv)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Mix_LoadWAV: \"%s\", aborting\n"),
                 ACE_TEXT (Mix_GetError ())));
-    exit (1);
-  }
+    ACE_OS::exit (1);
+  } // end IF
 
   SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
 
@@ -77,8 +77,8 @@ Game::Game (int argc, char** argv)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to TTF_OpenFont: \"%s\", aborting\n"),
                 ACE_TEXT (TTF_GetError ())));
-    exit (1);
-  }
+    ACE_OS::exit (1);
+  } // end IF
 
   music = new Music (path_base);
 
@@ -97,7 +97,7 @@ Game::initSystems ()
                 ACE_TEXT ("failed to SDL_Init: \"%s\", aborting\n"),
                 ACE_TEXT (SDL_GetError ())));
     return -1;
-  }
+  } // end IF
   screen = SDL_SetVideoMode (screen_w, screen_h, 32, SDL_SWSURFACE);
 
   if (TTF_Init () < 0)
@@ -106,7 +106,7 @@ Game::initSystems ()
                 ACE_TEXT ("failed to TTF_Init: \"%s\", aborting\n"),
                 ACE_TEXT (TTF_GetError ())));
     return -1;
-  }
+  } // end IF
 
 //#define ARKANOID_DEF_FREQUENCY 48000
   if (Mix_OpenAudio (MIX_DEFAULT_FREQUENCY,
@@ -119,19 +119,19 @@ Game::initSystems ()
                 ACE_TEXT ("failed to Mix_OpenAudio: \"%s\", aborting\n"),
                 ACE_TEXT (Mix_GetError ())));
     return -1;
-  }
-#ifdef _MSC_VER
-  int mixer_flags = MIX_INIT_MP3;
-#else
-  int mixer_flags = MIX_INIT_MP3 | MIX_INIT_FLUIDSYNTH;
-#endif
-  if (Mix_Init (mixer_flags) != mixer_flags)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Mix_Init: \"%s\", aborting\n"),
-                ACE_TEXT (Mix_GetError ())));
-    return -1;
-  }
+  } // end IF
+//#ifdef _MSC_VER
+//  int mixer_flags = MIX_INIT_MP3;
+//#else
+//  int mixer_flags = MIX_INIT_MP3 | MIX_INIT_FLUIDSYNTH;
+//#endif
+//  if (Mix_Init (mixer_flags) != mixer_flags)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Mix_Init: \"%s\", aborting\n"),
+//                ACE_TEXT (Mix_GetError ())));
+//    return -1;
+//  } // end IF
   //	// debug info
   //	const int total = Mix_GetNumChunkDecoders();
   //	for (int i = 0; i < total; i++)
@@ -171,12 +171,12 @@ Game::Loop ()
       static char buffer[10] = {0};
       ::sprintf (buffer, "%d FPS", fps_counter->getFPS ());
       SDL_WM_SetCaption (buffer, NULL);
-    }
+    } // end IF
     //else
     //  SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
 
     SDL_Flip (screen);
-  }
+  } // end WHILE
 
   return 0;
 }
@@ -205,14 +205,14 @@ ChangeState ()
     delete game->game_state;
     game->game_state = new MenuState ();
     game->game_state->InitState ();
-  }
+  } // end IF
   else if (game->current_state == MENU)
   {
     game->current_state = PLAYING;
     delete game->game_state;
     game->game_state = new PlayingState ();
     game->game_state->InitState ();
-  }
+  } // end ELSE IF
 }
 
 void
@@ -278,7 +278,7 @@ DisplayFinishText (unsigned int ms, const char* text)
   {
     text_image = TTF_RenderText_Solid (font, text, color);
     text_shade = TTF_RenderText_Solid (font, text, shade);
-  }
+  } // end IF
 
   int posX = g_GamePtr->GetScreen_W ()/2;
   int posY = g_GamePtr->GetScreen_H ()/2;
