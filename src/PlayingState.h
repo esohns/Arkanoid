@@ -27,32 +27,32 @@ class PlayingState
   virtual void UpdateState ();
   virtual void HandleEvents (Uint8*, const SDL_Event&, int);
 
-  void SetChangingStateFlag (bool flag) { changingstate = flag; }
-  bool GetChangingStateFlag () { return changingstate; }
+  inline void SetChangingStateFlag (bool flag) { changingstate = flag; }
+  inline bool GetChangingStateFlag () { return changingstate; }
 
-  Effect** GetEffects () { return effects; }
-  Projectile** GetProjectiles () { return projectiles; }
-  Platform* GetPlatform () { return platform; }
-  Ball* GetBall () { return ball; }
+  inline Effect** GetEffects () { return effects; }
+  inline Projectile** GetProjectiles () { return projectiles; }
+  inline Platform* GetPlatform () { return platform; }
+  inline Ball* GetBall () { return ball; }
 
   void LaunchSecondBall ();
 
  private:
   typedef State inherited;
 
-  bool changingstate;
+  bool                   changingstate;
 
   std::list<GameObject*> gobjects;
-  MapLoader* map_loader;
-    
-  Ball* ball;
-  Ball* second_ball;
-  Platform* platform;
-  Effect** effects;
-  Projectile** projectiles;
-  Gui* gui;
+  MapLoader*             map_loader;
 
-  int second_ball_flag;
+  Ball*                  ball;
+  Ball*                  second_ball;
+  Platform*              platform;
+  Effect**               effects;
+  Projectile**           projectiles;
+  Gui*                   gui;
+
+  int                    second_ball_flag;
 
   void SaveHighscores ();
 };

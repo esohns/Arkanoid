@@ -1,8 +1,8 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 //#include "ace/Dirent.h"
 
@@ -34,7 +34,7 @@ class Music
          Music_t = MUSIC_MIDI); // music type
   virtual ~Music ();
 
-  bool isMusicOn () { return musicOn_; }
+  inline bool isMusicOn () { return musicOn_; }
   void play (const std::string&, // track filename
              bool = true);       // loop ?
   void next (bool = true); // start playing ?

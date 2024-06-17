@@ -2,20 +2,21 @@
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
-#if defined _MSC_VER
+#if defined (_MSC_VER)
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: workaround quirky MSVC...
 #define NOMINMAX
 
 // Windows Header Files
-#include <windows.h>
-#endif
+#include "windows.h"
+#endif // _MSC_VER
 
 // System Library Header Files
 
 // C RunTime Header Files
-#include <string>
 #include <iostream>
+#include <string>
 
+#include "ace/config-lite.h"
 // Local Header Files

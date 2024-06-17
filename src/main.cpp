@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
-#include "ace/config-lite.h"
+#include <stdio.h>
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
 #endif // ACE_WIN32 || ACE_WIN64
@@ -10,7 +11,7 @@
 
 #include "Game.h"
 
-extern "C" { FILE __iob_func[3] = { *stdin,*stdout,*stderr }; }
+extern "C" { FILE __iob_func[3] = { *stdin, *stdout, *stderr }; }
 
 #ifdef __cplusplus
 extern "C"
@@ -18,7 +19,7 @@ extern "C"
 #endif /* __cplusplus */
 int
 main (int argc_in,
-      char** argv_in)
+      char* argv_in[])
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE::init ();
@@ -35,7 +36,6 @@ main (int argc_in,
 
   return status;
 }
-//#if defined(ACE_WIN32) || defined(ACE_WIN64)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

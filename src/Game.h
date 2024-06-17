@@ -38,22 +38,22 @@ class Game
   int Loop ();
   void HandleEvents ();
 
-  void SetScreen_W (int screen_w_in) { screen_w = screen_w_in; }
-  int GetScreen_W () { return screen_w; }
+  inline void SetScreen_W (int screen_w_in) { screen_w = screen_w_in; }
+  inline int GetScreen_W () { return screen_w; }
 
-  void SetScreen_H (int screen_h_in) { screen_h = screen_h_in; }
-  int GetScreen_H () { return screen_h; }
+  inline void SetScreen_H (int screen_h_in) { screen_h = screen_h_in; }
+  inline int GetScreen_H () { return screen_h; }
 
-  bool isSfxOn () { return sfxOn; }
+  inline bool isSfxOn () { return sfxOn; }
 
-  bool isFPSVisible () { return displayFPS; }
-  void setFPSVisile () { displayFPS = true; }
+  inline bool isFPSVisible () { return displayFPS; }
+  inline void setFPSVisile () { displayFPS = true; }
 
-  Music* GetMusic () { return music; }
-  Mix_Chunk* GetSfx () { return sound; }
-  SDL_Surface* GetScreen () { return screen; }
-  State* GetState () { return game_state; }
-  TTF_Font* GetMainFont () { return font; }
+  inline Music* GetMusic () { return music; }
+  inline Mix_Chunk* GetSfx () { return sound; }
+  inline SDL_Surface* GetScreen () { return screen; }
+  inline State* GetState () { return game_state; }
+  inline TTF_Font* GetMainFont () { return font; }
 
   friend void ChangeState ();
   friend void ShutDown ();

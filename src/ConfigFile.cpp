@@ -113,7 +113,7 @@ ConfigFile::ExtractValue (value_t& value,
 }
 
 struct is_whitespace_t
- : public std::unary_function<char, bool>
+ //: public std::unary_function<char, bool>
 {
   bool operator() (char character_in)
   {
@@ -124,7 +124,8 @@ struct is_whitespace_t
 };
 
 void
-ConfigFile::ExtractContents (std::string& line, size_t line_number)
+ConfigFile::ExtractContents (std::string& line,
+                             size_t line_number)
 {
   // remove any whitespace
 //  // *TODO*: find a solution using function binding...

@@ -24,7 +24,7 @@ bool
 Compare (const std::pair<std::string, int>& a,
          const std::pair<std::string, int>& b)
 {
-  return a > b;
+  return a.second > b.second;
 }
 
 State::State ()
@@ -46,11 +46,11 @@ State::State ()
   while (std::getline (file, line))
   {
     it = 0; // character pointer
-#ifdef __GNUC__
+#if defined (__GNUC__)
     line.erase (std::find (line.begin (), line.end (), ' '), line.end ()); //removing whitespaces
 #else
     line.erase (remove (line.begin (), line.end (), ' '), line.end ());    //removing whitespaces
-#endif
+#endif // __GNUC__
     std::string name = line.substr (0, it = line.find_first_of (","));     //getting players name
     line.erase (0, it + 1);
 

@@ -113,13 +113,15 @@ Music::Music (const std::string& baseDirectory_in,
               Music_t type_in)
  : musicOn_ (false)
  , music_ (NULL)
- //, musicDirectory_ ()
- //, musicFiles_ ()
+ , musicDirectory_ ()
+ , musicFiles_ ()
  , randomSeed_ (1)
  , repeat_ (false)
  , currentIndex_ (-1)
 {
   Mix_HookMusicFinished (music_finished);
+  Mix_Volume (-1, SOUNDS_MUSIC_VOLUME);
+  Mix_VolumeMusic (SOUNDS_MUSIC_VOLUME);
 
   musicDirectory_ = baseDirectory_in;
   if (musicDirectory_.empty ())
@@ -166,8 +168,7 @@ Music::play (const std::string& filename_in,
 
   if (music_)
   {
-    Mix_FreeMusic (music_);
-    music_ = NULL;
+    Mix_FreeMusic (music_); music_ = NULL;
   }
 
   for (currentIndex_ = 0;

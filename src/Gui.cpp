@@ -43,7 +43,8 @@ Gui::~Gui ()
 {
   SDL_FreeSurface (score_msg);
   SDL_FreeSurface (lives_msg);
-  if (font) TTF_CloseFont (font);
+  if (font)
+    TTF_CloseFont (font);
 }
 
 void

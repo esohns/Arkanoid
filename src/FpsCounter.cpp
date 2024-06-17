@@ -9,7 +9,7 @@ FpsCounter::FpsCounter (int FPS_rate)
  , lastTime (0)
  , lastFrame (0)
  , FPS (0)
- , frameDelay (static_cast<int>(1000.0 / static_cast<double>(FPS_rate)))
+ , frameDelay (static_cast<int> (1000.0 / static_cast<double> (FPS_rate)))
 {
 
 };

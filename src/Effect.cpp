@@ -2,6 +2,8 @@
 
 #include "Effect.h"
 
+#include "ace/OS.h"
+
 #include "Game.h"
 #include "PlayingState.h"
 
@@ -38,10 +40,10 @@ Effect::Init ()
 void
 Effect::Init (int x, int y)
 {
-  GameObject::Init (static_cast<float>(x), static_cast<float>(y),
-                    0.0, static_cast<float>(rand () % 2 + 1),
+  GameObject::Init (static_cast<float> (x), static_cast<float> (y),
+                    0.0f, static_cast<float> (ACE_OS::rand () % 2 + 1),
                     0, 1,
-                    static_cast<float>(animation->GetFrameWidth () / 2.0), static_cast<float>(animation->GetFrameHeight () / 2.0));
+                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 }
 

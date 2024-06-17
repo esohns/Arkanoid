@@ -5,6 +5,7 @@
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
 
+#include "defines.h"
 #include "Projectile.h"
 #include "PlayingState.h"
 
@@ -39,14 +40,14 @@ void
 Platform::Init ()
 {
   // Initializing ball
-  GameObject::Init (static_cast<float>(g_Game.GetScreen_W ())/2.0F,
-                    static_cast<float>(g_Game.GetScreen_H ())-10.0F,
-                    15.0F,
-                    0.0F,
+  GameObject::Init (g_Game.GetScreen_W () / 2.0f,
+                    static_cast<float> (g_Game.GetScreen_H ()) - 10.0f,
+                    PLATFORM_BASE_SPEED,
+                    0.0f,
                     0,
                     0,
-                    static_cast<float>(animation->GetFrameWidth ())/2.0F,
-                    static_cast<float>(animation->GetFrameHeight ())/2.0F);
+                    animation->GetFrameWidth () / 2.0f,
+                    animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 
   lives = 5;
@@ -72,18 +73,18 @@ Platform::Update ()
   {
     PlayingState* playing_state = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
     playing_state->SetChangingStateFlag (true);
-    char buffer[BUFSIZ];
-    ACE_OS::memset (&buffer, 0, sizeof (buffer));
-    char* username = buffer;
-#ifdef _MSC_VER
-    DWORD buffer_size = sizeof (buffer);
-    if (!GetUserName (buffer, &buffer_size))
+    char buffer_a[BUFSIZ];
+    ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
+    char* username = buffer_a;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    DWORD buffer_size = sizeof (char[BUFSIZ]);
+    if (!GetUserName (buffer_a, &buffer_size))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
                   GetLastError ()));
 #else
     username = ACE_OS::getenv ("USER");
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     playing_state->PushScore (username, GetScore ());
   }
   return 0;
@@ -96,7 +97,8 @@ Platform::Render ()
   {
     GameObject::Render ();
     //Rendering if animation exists
-    if (animation) animation->Draw (x-boundX, y-boundY);
+    if (animation)
+      animation->Draw (x - boundX, y - boundY);
   }
 }
 
@@ -151,5 +153,5 @@ void
 Platform::MorphPlatform (int effect_type)
 {
   has_effect = effect_type;
-  animation->SetFrame (effect_type+1);
+  animation->SetFrame (effect_type + 1);
 }

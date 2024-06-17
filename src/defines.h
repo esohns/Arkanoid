@@ -342,17 +342,20 @@ Public License instead of this License.*/
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#ifdef __GNUC__
+#if defined (__GNUC__)
 #define RESOURCE_DIRECTORY       "../Arkanoid/data"
 #else
 #define RESOURCE_DIRECTORY       "data"
-#endif
+#endif // __GNUC__
 #define GRAPHICS_DIRECTORY       "graphics"
 #define SOUNDS_DIRECTORY         "sounds"
+
+#define PLATFORM_BASE_SPEED      7.0f
 
 #define SOUNDS_MIDI_EXT          "mid"
 #define SOUNDS_MP3_EXT           "mp3"
 #define SOUNDS_MUSIC_FADE_PERIOD 1000 // ms
+#define SOUNDS_MUSIC_VOLUME      48   // [0-128]
 
 #define SMALL_FONT_SIZE          14  // point size
 #define MEDIUM_FONT_SIZE         28  // point size
@@ -361,6 +364,7 @@ Public License instead of this License.*/
 
 #define BASE_SCREEN_X            960
 #define BASE_SCREEN_Y            540
+#define BASE_GAME_FPS            30
 
 #define KEYBOARD                 0
 #define MOUSE                    1

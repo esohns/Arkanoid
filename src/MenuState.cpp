@@ -340,7 +340,7 @@ MenuState::RunCommand (std::list<T>& menu_list)
   {
     if (std::get<1> (*iter))
     {
-      std::get<2> (*iter)();
+      std::get<2> (*iter) ();
       break;  // we destroyed the whole object propably, we better get the **** out
     }
   }

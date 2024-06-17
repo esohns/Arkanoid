@@ -4,8 +4,8 @@
 
 #include <sstream>
 
-#include "ace/OS.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "SDL_image.h"
 
@@ -26,12 +26,12 @@ Game::Game (int argc, char** argv)
  : running (true)
  , paused (false)
  , displayFPS (false)
- , sfxOn (false)
+ , sfxOn (true)
  , control_type (KEYBOARD)
  , current_state (MENU)
  , screen_w (ACE_OS::atoi (argv[1]))
  , screen_h (ACE_OS::atoi (argv[2]))
- , gameFPS (60)
+ , gameFPS (BASE_GAME_FPS)
  , game_state (NULL)
  , fps_counter (NULL)
  , screen (NULL)
@@ -86,6 +86,9 @@ Game::Game (int argc, char** argv)
 
   game_state = new MenuState ();
   game_state->InitState ();
+
+  if (!music->isMusicOn ())
+    SwitchMusic ();
 }
 
 int
@@ -120,22 +123,22 @@ Game::initSystems ()
                 ACE_TEXT (Mix_GetError ())));
     return -1;
   } // end IF
-//#ifdef _MSC_VER
-//  int mixer_flags = MIX_INIT_MP3;
-//#else
-//  int mixer_flags = MIX_INIT_MP3 | MIX_INIT_FLUIDSYNTH;
-//#endif
-//  if (Mix_Init (mixer_flags) != mixer_flags)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Mix_Init: \"%s\", aborting\n"),
-//                ACE_TEXT (Mix_GetError ())));
-//    return -1;
-//  } // end IF
-  //	// debug info
-  //	const int total = Mix_GetNumChunkDecoders();
-  //	for (int i = 0; i < total; i++)
-  //		cerr << "Supported chunk decoder: " <<  Mix_GetChunkDecoder(i) << endl;
+  int mixer_flags_base_i = MIX_INIT_FLAC | MIX_INIT_MOD;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  int mixer_flags_i = mixer_flags_base_i | MIX_INIT_MP3;
+#else
+  int mixer_flags_i = mixer_flags_base_i | MIX_INIT_OGG | MIX_INIT_FLUIDSYNTH;
+#endif // ACE_WIN32 || ACE_WIN64
+  int result = Mix_Init (mixer_flags_i);
+  if (result != mixer_flags_i)
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to Mix_Init(0x%x): 0x%x: \"%s\", continuing\n"),
+                mixer_flags_i, result,
+                ACE_TEXT (Mix_GetError ())));
+  // debug info
+  const int total = Mix_GetNumChunkDecoders ();
+  for (int i = 0; i < total; i++)
+    std::cerr << "Supported chunk decoder: " <<  Mix_GetChunkDecoder (i) << std::endl;
 
   return 0;
 }
@@ -143,10 +146,14 @@ Game::initSystems ()
 void
 Game::closeSystems ()
 {
-  if (screen) SDL_FreeSurface (screen);
-  if (font) TTF_CloseFont (font);
-  if (sound) Mix_FreeChunk (sound);
+  if (screen)
+    SDL_FreeSurface (screen);
+  if (font)
+    TTF_CloseFont (font);
+  if (sound)
+    Mix_FreeChunk (sound);
   Mix_CloseAudio ();
+  Mix_Quit ();
   TTF_Quit ();
   SDL_Quit ();
 }
@@ -158,7 +165,8 @@ Game::Loop ()
   while (running)
   {
     render = fps_counter->measureFPS ();
-    if (!render) continue;
+    if (!render)
+      continue;
 
     HandleEvents ();
     SDL_FillRect (screen, NULL, 0);
@@ -168,12 +176,12 @@ Game::Loop ()
 
     if (displayFPS)
     {
-      static char buffer[10] = {0};
-      ::sprintf (buffer, "%d FPS", fps_counter->getFPS ());
-      SDL_WM_SetCaption (buffer, NULL);
+      char buffer_a[10] = {0};
+      ::sprintf (buffer_a, "%d FPS", fps_counter->getFPS ());
+      SDL_WM_SetCaption (buffer_a, NULL);
     } // end IF
-    //else
-    //  SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
+    else
+      SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
 
     SDL_Flip (screen);
   } // end WHILE
@@ -184,7 +192,7 @@ Game::Loop ()
 void
 Game::HandleEvents ()
 {
-  SDL_Event event;
+  union SDL_Event event;
   while (SDL_PollEvent (&event))
     if (event.type == SDL_QUIT)
       ShutDown ();
@@ -289,7 +297,10 @@ DisplayFinishText (unsigned int ms, const char* text)
   unsigned int firstMeasure = SDL_GetTicks ();
   while (SDL_GetTicks () - firstMeasure <= ms);
 
-  if (text_shade) SDL_FreeSurface (text_shade);
-  if (text_image) SDL_FreeSurface (text_image);
-  if (font) TTF_CloseFont (font);
+  if (text_shade)
+    SDL_FreeSurface (text_shade);
+  if (text_image)
+    SDL_FreeSurface (text_image);
+  if (font)
+    TTF_CloseFont (font);
 }

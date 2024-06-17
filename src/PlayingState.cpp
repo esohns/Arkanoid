@@ -3,6 +3,8 @@
 #include "PlayingState.h"
 
 #include <fstream>
+#include <list>
+#include <string>
 
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
@@ -12,7 +14,7 @@
 PlayingState::PlayingState ()
  : inherited ()
  , changingstate (false)
- //, gobjects ()
+ , gobjects ()
  , map_loader (NULL)
  , ball (NULL)
  , second_ball (NULL)
@@ -192,11 +194,11 @@ PlayingState::SaveHighscores ()
 void
 PlayingState::LaunchSecondBall ()
 {
-  int t_dirX = (ACE_OS::rand () % 2 + 1)*2 -3;
+  int t_dirX = (ACE_OS::rand () % 2 + 1) * 2 - 3;
   int t_dirY = (ACE_OS::rand () % 2 + 1) * 2 - 3;
 
   second_ball->GameObject::Init (ball->GetX (), ball->GetY (),
-                                 static_cast<float>(ACE_OS::rand () % 2 + 3), static_cast<float>(ACE_OS::rand () % 2 + 3),
+                                 static_cast<float> (ACE_OS::rand () % 2 + 3), static_cast<float> (ACE_OS::rand () % 2 + 3),
                                  t_dirX, t_dirY,
                                  ball->GetBoundX (), ball->GetBoundY ());
   second_ball->SetAlive (true);
