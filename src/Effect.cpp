@@ -32,12 +32,6 @@ Effect::Destroy ()
 }
 
 void
-Effect::Init ()
-{
-
-}
-
-void
 Effect::Init (int x, int y)
 {
   GameObject::Init (static_cast<float> (x), static_cast<float> (y),
@@ -53,7 +47,8 @@ Effect::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
-    if (animation) animation->Animate ();
+    if (animation)
+      animation->Animate ();
   }
 
   return 0;
@@ -65,7 +60,8 @@ Effect::Render ()
   if (isAlive ())
   {
     GameObject::Render ();
-    if (animation) animation->Draw (x-boundX, y-boundY);
+    if (animation)
+      animation->Draw (x - boundX, y - boundY);
   }
 }
 

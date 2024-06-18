@@ -4,6 +4,7 @@
 
 #include "defines.h"
 #include "Game.h"
+#include "scaler.h"
 
 Animation::Animation (const char* filename_in,
                       int maxFrame_in,
@@ -28,10 +29,10 @@ Animation::Animation (const char* filename_in,
   // formjula for checking if the last row is full in spritesheet if so then we have to adjust height of a loading image
   int loading_image_w = frameWidth * animationColumns;
   int loading_image_h;
-  if ((maxFrame+1)%animationColumns)
-    loading_image_h = frameHeight*((maxFrame+1)/animationColumns+1);
+  if ((maxFrame +1 ) % animationColumns)
+    loading_image_h = frameHeight * ((maxFrame + 1) / animationColumns + 1);
   else
-    loading_image_h = frameHeight*(((maxFrame+1)/animationColumns));
+    loading_image_h = frameHeight * (((maxFrame + 1) / animationColumns));
 
   //loading image to SDL_Surface* with new width and height
   image = LoadScaledBitmap (filename_in, loading_image_w, loading_image_h);
@@ -111,9 +112,3 @@ Animation::Draw (float x, float y) const
   SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
   SDL_BlitSurface (image, clip, g_Game.GetScreen (), &offset);
 }
-
-bool
-Animation::IsAutoAnimation ()
-{
-  return !animationDirection;
-};

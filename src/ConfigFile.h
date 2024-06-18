@@ -31,7 +31,7 @@ class ConfigFile
   std::string filename;
     
   template <typename T>
-  static T String_to_T (std::string const&);
+  static T String_to_T (const std::string&);
   static void ExitWithError (const std::string&);
 
   void RemoveComment (std::string&) const;

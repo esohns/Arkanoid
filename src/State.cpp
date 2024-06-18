@@ -30,13 +30,13 @@ Compare (const std::pair<std::string, int>& a,
 State::State ()
  //: highsco_list ()
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   std::string filename = path_base;
-  filename += ACE_DIRECTORY_SEPARATOR_STR;
+  filename += ACE_DIRECTORY_SEPARATOR_STR_A;
   filename += ACE_TEXT_ALWAYS_CHAR ("highscores");
   std::ifstream file;
   file.open (filename.c_str ());
@@ -46,11 +46,11 @@ State::State ()
   while (std::getline (file, line))
   {
     it = 0; // character pointer
-#if defined (__GNUC__)
+#if defined (ACE_LINUX)
     line.erase (std::find (line.begin (), line.end (), ' '), line.end ()); //removing whitespaces
 #else
     line.erase (remove (line.begin (), line.end (), ' '), line.end ());    //removing whitespaces
-#endif // __GNUC__
+#endif // ACE_LINUX
     std::string name = line.substr (0, it = line.find_first_of (","));     //getting players name
     line.erase (0, it + 1);
 

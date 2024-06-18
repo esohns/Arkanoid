@@ -6,14 +6,15 @@
 #include "SDL.h"
 
 #include "State.h"
-#include "GameObject.h"
-#include "Platform.h"
-#include "Ball.h"
-#include "Block.h"
-#include "Effect.h"
-#include "Projectile.h"
-#include "MapLoader.h"
-#include "Gui.h"
+
+// forward declarations
+class GameObject;
+class Platform;
+class Ball;
+class Effect;
+class Projectile;
+class MapLoader;
+class Gui;
 
 class PlayingState
  : public State

@@ -2,6 +2,8 @@
 
 #include "GameObject.h"
 
+#include "Animation.h"
+
 GameObject::GameObject (const char* filename,
                         int maxFrame,
                         int frameDelay,
@@ -9,14 +11,14 @@ GameObject::GameObject (const char* filename,
                         int frameHeight,
                         int animationColumns,
                         int animationDirection)
- : x (0.0)
- , y (0.0)
- , velX (0.0)
- , velY (0.0)
+ : x (0.0f)
+ , y (0.0f)
+ , velX (0.0f)
+ , velY (0.0f)
  , dirX (0)
  , dirY (0)
- , boundX (0.0)
- , boundY (0.0)
+ , boundX (0.0f)
+ , boundY (0.0f)
  , animation (NULL)
  , alive (false)
  , collidable (true)
@@ -39,18 +41,18 @@ GameObject::GameObject (SDL_Surface* image,
                         int frameHeight,
                         int animationColumns,
                         int animationDirection)
- : x (0.0)
- , y (0.0)
- , velX (0.0)
- , velY (0.0)
+ : x (0.0f)
+ , y (0.0f)
+ , velX (0.0f)
+ , velY (0.0f)
  , dirX (0)
  , dirY (0)
- , boundX (0.0)
- , boundY (0.0)
+ , boundX (0.0f)
+ , boundY (0.0f)
  , alive (false)
  , collidable (true)
 {
-  //creating Animation object if we have provided a filename
+  //creating Animation object if we have provided an image
   if (image)
     animation = new Animation (image,
                                maxFrame,
@@ -64,16 +66,10 @@ GameObject::GameObject (SDL_Surface* image,
 void
 GameObject::Destroy ()
 {
-  //Destorying GameObject
+  //Destroying GameObject
   if (animation)
-    delete animation;    // deleting Animation if it existed
+    delete animation; // deleting Animation if it existed
 }
-
-void
-GameObject::Init ()
-{
-
-}     // Leave that blank for overwriting
 
 void
 GameObject::Init (float x, float y,
@@ -110,7 +106,7 @@ GameObject::Render ()
 }
 
 // Collision detection function for every object
-col_dir
+enum col_dir
 GameObject::detectCollision (GameObject* otherObject)
 {
   if (!(Collidable () && otherObject->Collidable ()))
@@ -126,34 +122,31 @@ GameObject::detectCollision (GameObject* otherObject)
       (y + boundY > otherObjectY - otherObjectBoundY) &&
       (y - boundY < otherObjectY + otherObjectBoundY))
   {
-    if (::abs (x - otherObjectX) < otherObjectBoundX - 5) //Vertical collision
+    if (std::abs (x - otherObjectX) < otherObjectBoundX - 5) //Vertical collision
     {
-      if (y < otherObjectY) return TOP;
-      else return BOTTOM;
+      if (y < otherObjectY)
+        return TOP;
+      else
+        return BOTTOM;
     }
-    else if (::abs (y - otherObjectY) < 15) //Horizontal collision
+    else if (std::abs (y - otherObjectY) < otherObjectBoundY - 5) //Horizontal collision
     {
-      if (x < otherObjectX) return LEFT;
-      else return RIGHT;
+      if (x < otherObjectX)
+        return LEFT;
+      else
+        return RIGHT;
     }
-//        else { //Diagonal collision
-//            if(x < otherObjectX && y < otherObjectY)
-//                return TLCOR;
-//            else if (x < otherObjectX && y > otherObjectY)
-//                return BLCOR;
-//            else if (x > otherObjectX && y < otherObjectY)
-//                return TRCOR;
-//            else
-//                return BRCOR;
-//        }
+    else { //Diagonal collision
+      if (x < otherObjectX && y < otherObjectY)
+        return TLCOR;
+      else if (x < otherObjectX && y > otherObjectY)
+        return BLCOR;
+      else if (x > otherObjectX && y < otherObjectY)
+        return TRCOR;
+      else
+        return BRCOR;
+    }
   }
 
   return NO_COLLISION;
-}
-
-//Handle collisions differently for every object
-void
-GameObject::Collided (int objectID, col_dir dir)
-{
-
 }

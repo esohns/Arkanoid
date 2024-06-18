@@ -19,8 +19,8 @@ Background::Background (const char* filename, int width, int height)
   Background::width = new_width;
   Background::height = new_height;
 
-  Background::x = static_cast<float>(g_GamePtr->GetScreen_W ()) / 2.0F;
-  Background::y = static_cast<float>(g_GamePtr->GetScreen_H ()) / 2.0F;
+  Background::x = static_cast<float> (g_GamePtr->GetScreen_W ()) / 2.0f;
+  Background::y = static_cast<float> (g_GamePtr->GetScreen_H ()) / 2.0f;
 
   if (image)
   {
@@ -41,14 +41,8 @@ Background::~Background ()
 void
 Background::RenderBackground ()
 {
-  SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
+  struct SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
   SDL_BlitSurface (image, clip, g_Game.GetScreen (), &offset);
-}
-
-void
-Background::InitBackground ()
-{
-
 }
 
 void

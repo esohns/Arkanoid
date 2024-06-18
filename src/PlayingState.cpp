@@ -3,13 +3,20 @@
 #include "PlayingState.h"
 
 #include <fstream>
-#include <list>
 #include <string>
 
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
 
 #include "defines.h"
+#include "Game.h"
+#include "GameObject.h"
+#include "Platform.h"
+#include "Ball.h"
+#include "Effect.h"
+#include "Projectile.h"
+#include "MapLoader.h"
+#include "Gui.h"
 
 PlayingState::PlayingState ()
  : inherited ()
@@ -23,15 +30,15 @@ PlayingState::PlayingState ()
  , projectiles (NULL)
  , gui (NULL)
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string graphics_base = path_base;
   graphics_base += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
-  graphics_base += ACE_DIRECTORY_SEPARATOR_STR;
+  graphics_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string file = graphics_base;
   file += ACE_TEXT_ALWAYS_CHAR ("platformw.png");
   platform = new Platform (file.c_str (), 3, 0, 66, 18, 4, 0);
@@ -46,11 +53,11 @@ PlayingState::PlayingState ()
 
   //loading blocks
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("config.cfg");
   map_loader = new MapLoader (file.c_str ());
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("map.cfg");
   gobjects.splice (gobjects.end (), map_loader->LoadMap (file.c_str ()));
 
@@ -178,9 +185,9 @@ PlayingState::SaveHighscores ()
   char buffer[MAX_PATH];
   ACE_OS::getcwd (buffer, sizeof (buffer));
   std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string filename = path_base + ACE_TEXT_ALWAYS_CHAR ("highscores");
   std::ofstream file;
   file.open (filename.c_str ());

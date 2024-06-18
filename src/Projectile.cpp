@@ -2,7 +2,9 @@
 
 #include "Projectile.h"
 
+#include "Animation.h"
 #include "Game.h"
+#include "Platform.h"
 #include "PlayingState.h"
 
 Projectile::Projectile (const char* filename,
@@ -32,10 +34,10 @@ Projectile::Destroy ()
 void
 Projectile::Init (int x, int y, int velY)
 {
-  GameObject::Init (static_cast<float>(x), static_cast<float>(y),
-                    0.0, static_cast<float>(velY),
+  GameObject::Init (static_cast<float> (x), static_cast<float> (y),
+                    0.0f, static_cast<float> (velY),
                     0, -1,
-                    static_cast<float>(animation->GetFrameWidth ())/2.0F, static_cast<float>(animation->GetFrameHeight ())/2.0F);
+                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 }
 
@@ -45,7 +47,8 @@ Projectile::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
-    if (animation) animation->Animate ();
+    if (animation)
+      animation->Animate ();
   }
 
   return 0;
@@ -57,7 +60,8 @@ Projectile::Render ()
   if (isAlive ())
   {
     GameObject::Render ();
-    if (animation) animation->Draw (x-boundX, y-boundY);
+    if (animation)
+      animation->Draw (x-boundX, y-boundY);
   }
 }
 

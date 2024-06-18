@@ -1,6 +1,8 @@
 #ifndef __Arkanoid__Game__
 #define __Arkanoid__Game__
 
+#include <string>
+
 #include "SDL.h"
 #include "SDL_ttf.h"
 #include "SDL_mixer.h"
@@ -33,8 +35,9 @@ class Game
  : public Singleton<Game>
 {
  public:
-  Game (int argc, char** argv);
+  Game (int, char*[]);
   virtual ~Game ();
+
   int Loop ();
   void HandleEvents ();
 
@@ -60,34 +63,34 @@ class Game
   friend void SwitchFPSVisibility ();
   friend void SwitchSfx ();
 
-  static void Draw (SDL_Surface* screen, SDL_Surface* source, int x, int y);  // helper function for drawing
+  static void Draw (SDL_Surface*, SDL_Surface*, int, int);  // helper function for drawing
 
  private:
   int initSystems ();
   void closeSystems ();
 
-  bool running;
-  bool paused;
+  bool         running;
+  bool         paused;
 
-  bool displayFPS;
-  bool sfxOn;
+  bool         displayFPS;
+  bool         sfxOn;
 
-  int control_type;
+  int          control_type;
 
-  int current_state;
+  int          current_state;
 
-  int screen_w;
-  int screen_h;
-  int gameFPS;
+  int          screen_w;
+  int          screen_h;
+  int          gameFPS;
 
-  State* game_state;
+  State*       game_state;
 
-  FpsCounter* fps_counter;
+  FpsCounter*  fps_counter;
 
   SDL_Surface* screen;
-  Music* music;
-  Mix_Chunk* sound;
-  TTF_Font* font;
+  Music*       music;
+  Mix_Chunk*   sound;
+  TTF_Font*    font;
 };
 
 #endif /* defined(__Arkanoid__Game__) */

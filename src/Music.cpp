@@ -120,7 +120,6 @@ Music::Music (const std::string& baseDirectory_in,
  , currentIndex_ (-1)
 {
   Mix_HookMusicFinished (music_finished);
-  Mix_Volume (-1, SOUNDS_MUSIC_VOLUME);
   Mix_VolumeMusic (SOUNDS_MUSIC_VOLUME);
 
   musicDirectory_ = baseDirectory_in;

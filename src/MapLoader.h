@@ -7,8 +7,9 @@
 
 #include "SDL.h"
 
-#include "GameObject.h"
-#include "ConfigFile.h"
+// forward declarations
+class ConfigFile;
+class GameObject;
 
 typedef std::list<GameObject*> map_t;
 

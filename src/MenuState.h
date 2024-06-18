@@ -7,7 +7,6 @@
 #include "SDL.h"
 #include "SDL_ttf.h"
 
-//#include "Game.h"
 #include "State.h"
 #include "Background.h" 
 

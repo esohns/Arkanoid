@@ -6,9 +6,12 @@
 
 #include "ace/OS.h"
 
+#include "Block.h"
+#include "ConfigFile.h"
 #include "defines.h"
 #include "Game.h"
-#include "Block.h"
+#include "GameObject.h"
+#include "scaler.h"
 
 // offsets for placing blocks properly on screen such that its edges are aligned with screen edges
 #define offsetX g_Game.GetScreen_W ()/(float)BASE_SCREEN_X*value.frameWidth/2.0

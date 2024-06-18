@@ -37,12 +37,12 @@ MenuState::MenuState ()
   char buffer[MAX_PATH];
   ACE_OS::getcwd (buffer, sizeof (buffer));
   std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   std::string file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("background2.jpg");
   bgs.push_back (new Background (file.c_str (), 1366, 768));
   //file = path_base;
@@ -58,20 +58,20 @@ MenuState::MenuState ()
   //file += ACE_TEXT_ALWAYS_CHAR ("starsmidground.png");
   //bgs.push_back (new Background (file.c_str (), 1800, 1050));
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("starsforeground.png");
   bgs.push_back (new Background (file.c_str (), 1550, 950));
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("starsforeforeground.png");
   bgs.push_back (new Background (file.c_str (), 1800, 1050));
 
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("font.ttf");
   font = TTF_OpenFont (file.c_str (), MEDIUM_FONT_SIZE); // loading menu font
   if (!font)
@@ -79,7 +79,7 @@ MenuState::MenuState ()
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to TTF_OpenFont: \"%s\", aborting\n"),
                 ACE_TEXT (TTF_GetError ())));
-    exit (1);
+    ACE_OS::exit (1);
   }
 
   //Function pointers
@@ -236,8 +236,8 @@ void
 MenuState::UpdateState ()
 {
   for (std::list<Background*>::iterator iter = bgs.begin (); iter != bgs.end (); iter++)
-    (*iter)->UpdateBackground (static_cast<float> (g_GamePtr->GetScreen_W ())-mouse_pos_x,
-                               static_cast<float> (g_GamePtr->GetScreen_H ())-mouse_pos_y);
+    (*iter)->UpdateBackground (static_cast<float> (g_GamePtr->GetScreen_W ()) - mouse_pos_x,
+                               static_cast<float> (g_GamePtr->GetScreen_H ()) - mouse_pos_y);
 
   switch (curMenu)
   {
@@ -320,9 +320,7 @@ MenuState::UpdateList (std::list<T>& menu_list)
         (mouse_pos_x <= offsetX + (std::get<0> (std::get<0> (*iter)))->w) &&
         (mouse_pos_y >= offsetY + counter)                                &&
         (mouse_pos_y <= offsetY + counter + std::get<0> (std::get<0> (*iter))->h))
-    {
       std::get<1> (*iter) = true;
-    }
     else
       std::get<1> (*iter) = false;
 
@@ -337,13 +335,11 @@ MenuState::RunCommand (std::list<T>& menu_list)
   for (typename std::list<T>::iterator iter = menu_list.begin ();
        iter != menu_list.end ();
        iter++)
-  {
     if (std::get<1> (*iter))
     {
       std::get<2> (*iter) ();
-      break;  // we destroyed the whole object propably, we better get the **** out
+      break;
     }
-  }
 }
 
 void

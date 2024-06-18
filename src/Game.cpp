@@ -2,6 +2,7 @@
 
 #include "Game.h"
 
+#include <iostream>
 #include <sstream>
 
 #include "ace/Log_Msg.h"
@@ -13,16 +14,7 @@
 #include "MenuState.h"
 #include "PlayingState.h"
 
-Game::~Game ()
-{
-  delete music;
-  delete fps_counter;
-  delete game_state;
-
-  closeSystems ();
-}
-
-Game::Game (int argc, char** argv)
+Game::Game (int argc, char* argv[])
  : running (true)
  , paused (false)
  , displayFPS (false)
@@ -39,8 +31,8 @@ Game::Game (int argc, char** argv)
  , sound (NULL)
  , font (NULL)
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (char[MAX_PATH]));
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
 
   if (initSystems () == -1)
   {
@@ -49,13 +41,13 @@ Game::Game (int argc, char** argv)
     ACE_OS::exit (1);
   } // end IF
 
-  std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   std::string file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += SOUNDS_DIRECTORY;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("sfx.wav");
   sound = Mix_LoadWAV (file.c_str ());
   if (!sound)
@@ -89,6 +81,15 @@ Game::Game (int argc, char** argv)
 
   if (!music->isMusicOn ())
     SwitchMusic ();
+}
+
+Game::~Game ()
+{
+  delete music;
+  delete fps_counter;
+  delete game_state;
+
+  closeSystems ();
 }
 
 int

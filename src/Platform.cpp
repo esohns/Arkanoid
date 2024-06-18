@@ -5,7 +5,9 @@
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
 
+#include "Animation.h"
 #include "defines.h"
+#include "Game.h"
 #include "Projectile.h"
 #include "PlayingState.h"
 
@@ -66,7 +68,8 @@ Platform::Update ()
     else if (x < boundX)
       x = boundX;
     //Updating of animation exists
-    if (animation) animation->Animate ();
+    if (animation)
+      animation->Animate ();
   }
 
   if (!GetLives ())
@@ -128,7 +131,7 @@ Platform::Collided (int objectID, col_dir dir)
 
   if (objectID == BALL)
   {
-    if (!(has_effect == MAGNET))                       // if platform is under effect of Magnet then we dont want to add points constantly
+    if (!(has_effect == MAGNET)) // if platform is under effect of Magnet then we dont want to add points constantly
       AddPoint ();
   }
 }

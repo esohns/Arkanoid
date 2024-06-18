@@ -2,6 +2,9 @@
 
 #include "Block.h"
 
+#include "ace/OS.h"
+
+#include "Animation.h"
 #include "Game.h"
 #include "Effect.h"
 #include "PlayingState.h"
@@ -64,9 +67,9 @@ Block::Init (float x,
 {
   // Initializing block
   GameObject::Init (x, y,
-                    static_cast<float>(speed), 0.0F,
+                    static_cast<float> (speed), 0.0f,
                     dirX, 0,
-                    static_cast<float>(animation->GetFrameWidth ())/2.0F, static_cast<float>(animation->GetFrameHeight ())/2.0F);
+                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 
   Block::health = health;
@@ -80,11 +83,13 @@ Block::Update ()
   {
     GameObject::Update ();
     //Performing boundry checking
-    if (x > g_Game.GetScreen_W ()-boundX || x < boundX)
+    if (x > g_Game.GetScreen_W () - boundX || x < boundX)
       dirX *= -1;
     //Updating of animation exists
-    if (animation) animation->Animate ();
+    if (animation)
+      animation->Animate ();
   }
+
   return 0;
 }
 
@@ -95,13 +100,13 @@ Block::Render ()
   {
     GameObject::Render ();
     //Rendering if animation exists
-    if (animation) animation->Draw (x-boundX, y-boundY);
+    if (animation)
+      animation->Draw (x - boundX, y - boundY);
   }
 }
 
 void
-Block::Collided (int objectID,
-                 col_dir dir)
+Block::Collided (int objectID, col_dir dir)
 {
   if (dir == NO_COLLISION)
     return;
@@ -111,16 +116,19 @@ Block::Collided (int objectID,
     if (!--health)
     {
       Effect** effs = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetEffects ();
-      if (rand ()%2)
+      if (ACE_OS::rand () % 2)
       {
-        int index = rand ()%3;
+        int index = ACE_OS::rand () % 3;
         if (!effs[index]->isAlive ())
-          effs[index]->Init (static_cast<int>(x), static_cast<int>(y));
+          effs[index]->Init (static_cast<int> (x), static_cast<int> (y));
       }
       SetAlive (false);
     }
     else if (animation->IsAutoAnimation ())
       animation->SetFrame (maxhealth - health);
+
+    if (g_GamePtr->isSfxOn ())
+      Mix_PlayChannel(-1, g_GamePtr->GetSfx (), 0);
   }
   else if (objectID == BLOCK)
   {

@@ -2,6 +2,16 @@
 
 #include "scaler.h"
 
+#include <iostream>
+
+#if defined (ACE_LINUX)
+#include "SDL/SDL_image.h"
+#else
+#include "SDL_image.h"
+#endif // ACE_LINUX
+
+#include "ace/OS.h"
+
 SDL_Surface*
 LoadScaledBitmap (const char* filename, int width, int height)
 {
@@ -9,8 +19,8 @@ LoadScaledBitmap (const char* filename, int width, int height)
   SDL_Surface *temp = IMG_Load (filename);
   if (!temp)
   {
-    std::cerr << "IMG_Load: " << IMG_GetError() << std::endl;
-    exit (1);
+    std::cerr << ACE_TEXT_ALWAYS_CHAR ("IMG_Load: ") << IMG_GetError () << std::endl;
+    ACE_OS::exit (1);
   } // end IF
 
   // apply alpha channel

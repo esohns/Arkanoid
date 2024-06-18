@@ -7,6 +7,8 @@
 #include <typeinfo>
 #include <algorithm>
 
+#include "ace/OS.h"
+
 ConfigFile::ConfigFile (const std::string& filename_in)
  : filename (filename_in)
 {
@@ -15,13 +17,13 @@ ConfigFile::ConfigFile (const std::string& filename_in)
 
 template <typename T>
 T
-ConfigFile::String_to_T (std::string const &val)
+ConfigFile::String_to_T (const std::string &val)
 {
   std::istringstream istr (val);
   T returnVal;
 
   if (!(istr >> returnVal))
-    ExitWithError("ConfigFile: Not a valid " + (std::string)typeid(T).name() + " received!\n");
+    ExitWithError (ACE_TEXT_ALWAYS_CHAR ("ConfigFile: Not a valid " + (std::string)typeid (T).name () + " received\n"));
 
   return returnVal;
 }
@@ -33,20 +35,21 @@ ConfigFile::ExitWithError (const std::string& error)
   std::cin.ignore ();
   std::cin.get ();
 
-  exit (EXIT_FAILURE);
+  ACE_OS::exit (EXIT_FAILURE);
 }
 
 void
 ConfigFile::RemoveComment (std::string& line) const
 {
-  if (line.find (";") != line.npos)
-    line.erase (line.find (";"));
+  std::string::size_type position = line.find (";");
+  if (position != std::string::npos)
+    line.erase (position);
 }
 
 bool
 ConfigFile::HasOnlyWhiteSpace (std::string& line) const
 {
-  return (line.find_first_not_of (' ') == line.npos);
+  return (line.find_first_not_of (' ') == std::string::npos);
 }
 
 bool
@@ -91,37 +94,37 @@ ConfigFile::ExtractValue (value_t& value,
 {
   size_t it = 0;
 
-  value.filename = line.substr (0, it=line.find_first_of (','));
-  line.erase (0, it+1);
-  value.maxFrame = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.frameDelay = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.frameWidth = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.frameHeight = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.animationColumns = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.animationDirection = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.speed = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.dirX = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
-  line.erase (0, it+1);
-  value.health = String_to_T<int> (line.substr (0, it=line.find_first_of (',')));
+  value.filename = line.substr (0, it = line.find_first_of (','));
+  line.erase (0, it + 1);
+  value.maxFrame = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.frameDelay = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.frameWidth = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.frameHeight = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.animationColumns = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.animationDirection = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.speed = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.dirX = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
+  line.erase (0, it + 1);
+  value.health = String_to_T<int> (line.substr (0, it = line.find_first_of (',')));
 }
 
-struct is_whitespace_t
- //: public std::unary_function<char, bool>
-{
-  bool operator() (char character_in)
-  {
-    char target[] = {' ', '\t', 0};
-
-    return (std::find (target, target + 2, character_in) != 0);
-  }
-};
+//struct is_whitespace_t
+// //: public std::unary_function<char, bool>
+//{
+//  bool operator () (char character_in)
+//  {
+//    char target[] = {' ', '\t', 0};
+//
+//    return (std::find (target, target + 2, character_in) != 0);
+//  }
+//};
 
 void
 ConfigFile::ExtractContents (std::string& line,
@@ -150,9 +153,9 @@ void
 ConfigFile::Parse ()
 {
   std::ifstream file;
-  file.open (filename.c_str ());
+  file.open (filename);
   if (!file)
-    ExitWithError ("ConfigFile: File" + filename + "couldn't be found!\n");
+    ExitWithError ("ConfigFile: file " + filename + "not found\n");
 
   std::string line;
   size_t line_number = 0;

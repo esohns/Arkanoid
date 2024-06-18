@@ -14,15 +14,15 @@ class Ball
         int = 0,
         int = 0,
         int = 0);
-  virtual ~Ball ();
+  inline virtual ~Ball () {}
 
   void Destroy ();
   void Init ();
   void Render ();
   int Update ();
 
-  void MorphBall (int effect) { has_effect = effect; }
-  void LoseEffect () { has_effect = -1;}
+  inline void MorphBall (int effect) { has_effect = effect; }
+  inline void LoseEffect () { has_effect = -1;}
   void StartFlying ();
 
   //respond to collision function
@@ -31,7 +31,7 @@ class Ball
  private:
   typedef GameObject inherited;
 
-  int has_effect;
+  int  has_effect;
   bool stand_on_platform;
 };
 
