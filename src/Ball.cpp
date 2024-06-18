@@ -44,7 +44,7 @@ Ball::Init ()
   float posY = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->GetY ();
   int t_dirX = (ACE_OS::rand () % 2 + 1) * 2 - 3; //  picking random direction either left or right
   inherited::Init (posX, posY - static_cast<float> (animation->GetFrameHeight () / 2),
-                   static_cast<float>(ACE_OS::rand () % 1 + 3), static_cast<float> (ACE_OS::rand () % 1 + 3),
+                   static_cast<float> (ACE_OS::rand () % 1 + 3), static_cast<float> (ACE_OS::rand () % 1 + 3),
                    t_dirX, -1,
                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
 }
@@ -84,7 +84,8 @@ Ball::Update ()
       dirX *= -1;
     else if (y <= boundY)
       dirY *= -1;
-    else if (y >= g_Game.GetScreen_H ())
+    
+    if (y >= g_Game.GetScreen_H ())
     {
       SetAlive (false);
       LoseEffect ();
@@ -93,6 +94,7 @@ Ball::Update ()
       platform->MorphPlatform (-1); // calling platform to lose it's effect because ball has just died
     }
   }
+  
   // we also update its animation if it exists
   if (animation)
     animation->Animate ();

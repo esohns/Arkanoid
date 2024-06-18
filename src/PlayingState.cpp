@@ -58,14 +58,14 @@ PlayingState::PlayingState ()
   map_loader = new MapLoader (file.c_str ());
   file = path_base;
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
-  file += ACE_TEXT_ALWAYS_CHAR ("map.cfg");
+  file += ACE_TEXT_ALWAYS_CHAR (DEFAULT_MAP_FILE);
   gobjects.splice (gobjects.end (), map_loader->LoadMap (file.c_str ()));
 
   //loading projectiles
   file = graphics_base;
   file += ACE_TEXT_ALWAYS_CHAR ("effect.png");
-  projectiles = new Projectile*[10]; // Creating 10 projectile pointers as arbitrary value
-  for (int i=0; i<3; i++)
+  projectiles = new Projectile*[DEFAULT_PROJECTILES_MAX]; // Creating 10 projectile pointers as arbitrary value
+  for (int i = 0; i < DEFAULT_PROJECTILES_MAX; i++)
   {
     projectiles[i] = new Projectile (file.c_str (), 23, 4, 16, 14, 24, 1);
     gobjects.push_back (projectiles[i]);

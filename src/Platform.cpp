@@ -142,11 +142,11 @@ Platform::Shoot ()
   if (has_effect == GUN)
   {
     Projectile** projectiles_temp = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetProjectiles ();
-    for (int i=0; i<3; i++)
+    for (int i = 0; i < DEFAULT_PROJECTILES_MAX; i++)
       if (!projectiles_temp[i]->isAlive ())
       {
-        projectiles_temp[i]->Init (static_cast<int>(x), static_cast<int>(y),
-                                   3);
+        projectiles_temp[i]->Init (static_cast<int> (x), static_cast<int> (y),
+                                   12);
         return;
       }
   }
