@@ -11,8 +11,11 @@
 #include "SDL_image.h"
 
 #include "defines.h"
+#include "FpsCounter.h"
 #include "MenuState.h"
+#include "Music.h"
 #include "PlayingState.h"
+#include "State.h"
 
 Game::Game (int argc, char* argv[])
  : running (true)

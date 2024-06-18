@@ -342,11 +342,11 @@ Public License instead of this License.*/
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#if defined (__GNUC__)
+#if defined (ACE_LINUX)
 #define RESOURCE_DIRECTORY       "../Arkanoid/data"
 #else
 #define RESOURCE_DIRECTORY       "data"
-#endif // __GNUC__
+#endif // ACE_LINUX
 #define GRAPHICS_DIRECTORY       "graphics"
 #define SOUNDS_DIRECTORY         "sounds"
 
@@ -369,6 +369,6 @@ Public License instead of this License.*/
 #define KEYBOARD                 0
 #define MOUSE                    1
 
-#define WINDOW_CAPTION           "ARKANOID"
+#define WINDOW_CAPTION           "Arkanoid"
 
 #endif // DEFINES_H

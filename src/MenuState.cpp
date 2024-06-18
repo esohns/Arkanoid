@@ -2,13 +2,12 @@
 
 #include "MenuState.h"
 
-#include <sstream>
-
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
 
 #include "defines.h"
 #include "Game.h"
+#include "Music.h"
 
 #define RenderTextColor(_text, _color) TTF_RenderText_Solid (font, _text, _color) // helpful macro for rendering text with color
 // macro for placing 3 SDL_Surfaces in different colours defined as below
@@ -34,9 +33,9 @@ MenuState::MenuState ()
  //, highlight ()
  , font (NULL)
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   std::string file = path_base;
@@ -83,7 +82,7 @@ MenuState::MenuState ()
   }
 
   //Function pointers
-  startgame = ChangeState;       // pointer to function in Game.h to changes between states
+  startgame = ChangeState;       // pointer to function in Game.h to change between states
   quit = ShutDown;               // pointer to function in Game.h that performs an application shutdown
   options = GotoOptions;         // pointer in to function that changes curMenu to OPTIONS
   highscores = GotoHighscores;   // pointer in to function that changes curMenu to HIGHSCORES

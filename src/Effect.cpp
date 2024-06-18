@@ -4,7 +4,10 @@
 
 #include "ace/OS.h"
 
+#include "Animation.h"
+#include "Ball.h"
 #include "Game.h"
+#include "Platform.h"
 #include "PlayingState.h"
 
 Effect::Effect (const char* filename,

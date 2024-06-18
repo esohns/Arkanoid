@@ -7,18 +7,19 @@
 #include "SDL_ttf.h"
 #include "SDL_mixer.h"
 
-#include "State.h"
 #include "Singleton.h"
-#include "FpsCounter.h"
-#include "Music.h"
 
 #define g_Game        Game::GetSingleton ()
 #define g_GamePtr     Game::GetSingletonPtr ()
 
 enum GAME_STATE {MENU, PLAYING};
 
-class PlayingState;
+// forward declarations
+class FpsCounter;
 class MenuState;
+class Music;
+class PlayingState;
+class State;
 
 //helper function for conversion
 std::string IntToStr (int n);
