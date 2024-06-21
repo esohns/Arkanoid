@@ -91,6 +91,7 @@ getpixel (SDL_Surface* surface, int x, int y)
     default:
       break;
   }
+
   return 0;       /* shouldn't happen, but avoids warnings */
 }
 

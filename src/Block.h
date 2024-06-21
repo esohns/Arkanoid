@@ -17,6 +17,8 @@ class Block
   void Render ();
   int Update ();
 
+  inline int GetHealth () { return health; }
+
   //respond to collision function
   void Collided (int, enum col_dir);
 

@@ -69,7 +69,7 @@ Effect::Render ()
 }
 
 void
-Effect::Collided (int ObjectID, col_dir dir)
+Effect::Collided (int ObjectID, enum col_dir dir)
 {
   if (dir == NO_COLLISION)
     return;

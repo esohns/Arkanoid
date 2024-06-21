@@ -22,7 +22,7 @@ Game::Game (int argc, char* argv[])
  , paused (false)
  , displayFPS (false)
  , sfxOn (true)
- , control_type (KEYBOARD)
+ , control_type (DEFAULT_CONTROL_TYPE)
  , current_state (MENU)
  , screen_w (ACE_OS::atoi (argv[1]))
  , screen_h (ACE_OS::atoi (argv[2]))
@@ -64,7 +64,7 @@ Game::Game (int argc, char* argv[])
   SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
 
   file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("mainfont.ttf");
   font = TTF_OpenFont (file.c_str (), LARGE_FONT_SIZE);
   if (!font)
@@ -142,7 +142,7 @@ Game::initSystems ()
   // debug info
   const int total = Mix_GetNumChunkDecoders ();
   for (int i = 0; i < total; i++)
-    std::cerr << "Supported chunk decoder: " <<  Mix_GetChunkDecoder (i) << std::endl;
+    std::cerr << ACE_TEXT_ALWAYS_CHAR ("Supported chunk decoder: ") <<  Mix_GetChunkDecoder (i) << std::endl;
 
   return 0;
 }
@@ -165,11 +165,11 @@ Game::closeSystems ()
 int
 Game::Loop ()
 {
-  int render = -1;
+  bool render_b = false;
   while (running)
   {
-    render = fps_counter->measureFPS ();
-    if (!render)
+    render_b = fps_counter->measureFPS ();
+    if (!render_b)
       continue;
 
     HandleEvents ();
@@ -181,7 +181,7 @@ Game::Loop ()
     if (displayFPS)
     {
       char buffer_a[10] = {0};
-      ::sprintf (buffer_a, "%d FPS", fps_counter->getFPS ());
+      ::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
       SDL_WM_SetCaption (buffer_a, NULL);
     } // end IF
     else
@@ -234,10 +234,20 @@ ShutDown ()
 }
 
 void
-SwitchFPSVisibility ()
+SwitchControl ()
 {
-  g_GamePtr->displayFPS = !g_GamePtr->displayFPS;
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SHOWFPS);
+  switch (g_GamePtr->control_type)
+  {
+    case KEYBOARD:
+      g_GamePtr->control_type = MOUSE;
+      break;
+    case MOUSE:
+      g_GamePtr->control_type = KEYBOARD;
+      break;
+    default:
+     break;
+  } // end SWITCH
+  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (CONTROL);
 }
 
 void
@@ -245,6 +255,13 @@ SwitchSfx ()
 {
   g_GamePtr->sfxOn = !g_GamePtr->sfxOn;
   dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SOUNDON);
+}
+
+void
+SwitchFPSVisibility ()
+{
+  g_GamePtr->displayFPS = !g_GamePtr->displayFPS;
+  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SHOWFPS);
 }
 
 void
@@ -268,43 +285,43 @@ IntToStr (int n)
 void
 DisplayFinishText (unsigned int ms, const char* text)
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   std::string file = path_base;
-  file += ACE_DIRECTORY_SEPARATOR_STR;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("font.ttf");
   TTF_Font* font = TTF_OpenFont (file.c_str (), HUGE_FONT_SIZE);
   if (!font)
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to TTF_OpenFont: \"%s\", continuing\n"),
+                ACE_TEXT ("failed to TTF_OpenFont: \"%s\", returning\n"),
                 ACE_TEXT (TTF_GetError ())));
+    return;
+  }
 
   SDL_Surface* text_image = NULL;
   SDL_Surface* text_shade = NULL;
-  SDL_Color color = {0x2b, 0xd7, 0xb7, 0};
-  SDL_Color shade = {0xff, 0xff, 0xff, 0};
-  if (font)
-  {
-    text_image = TTF_RenderText_Solid (font, text, color);
-    text_shade = TTF_RenderText_Solid (font, text, shade);
-  } // end IF
+  struct SDL_Color color = {0x2b, 0xd7, 0xb7, 0};
+  struct SDL_Color shade = {0xff, 0xff, 0xff, 0};
+  text_image = TTF_RenderText_Solid (font, text, color);
+  text_shade = TTF_RenderText_Solid (font, text, shade);
+  ACE_ASSERT (text_image && text_shade);
 
-  int posX = g_GamePtr->GetScreen_W ()/2;
-  int posY = g_GamePtr->GetScreen_H ()/2;
-  Game::Draw (g_GamePtr->GetScreen (), text_shade, posX - text_shade->w/2 +2, posY - text_shade->h/2 +2);
-  Game::Draw (g_GamePtr->GetScreen (), text_image, posX - text_image->w / 2, posY - text_image->h / 2);
-  SDL_Flip (g_GamePtr->GetScreen ());
+  int posX = g_GamePtr->GetScreen_W () / 2;
+  int posY = g_GamePtr->GetScreen_H () / 2;
+  SDL_Surface* screen_p = g_GamePtr->GetScreen ();
+  ACE_ASSERT (screen_p);
+  Game::Draw (screen_p, text_shade, posX - text_shade->w / 2 + 2, posY - text_shade->h / 2 + 2);
+  Game::Draw (screen_p, text_image, posX - text_image->w / 2,     posY - text_image->h / 2);
+  SDL_Flip (screen_p);
 
   unsigned int firstMeasure = SDL_GetTicks ();
   while (SDL_GetTicks () - firstMeasure <= ms);
 
-  if (text_shade)
-    SDL_FreeSurface (text_shade);
-  if (text_image)
-    SDL_FreeSurface (text_image);
-  if (font)
-    TTF_CloseFont (font);
+  SDL_FreeSurface (text_shade);
+  SDL_FreeSurface (text_image);
+  TTF_CloseFont (font);
 }

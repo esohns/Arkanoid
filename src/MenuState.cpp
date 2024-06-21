@@ -87,9 +87,10 @@ MenuState::MenuState ()
   options = GotoOptions;         // pointer in to function that changes curMenu to OPTIONS
   highscores = GotoHighscores;   // pointer in to function that changes curMenu to HIGHSCORES
   mainmenu  = GotoMainMenu;      // pointer in to function that changes curMenu to MAINMENU
-  showfps = SwitchFPSVisibility; // pointer to function in Game.h that switches displayFPS flag on or off
+  switchcontrol = SwitchControl; // pointer to function in Game.h that switches control_type between Keyboard and Mouse
   musicon = SwitchMusic;         // pointer to function in Game.h that switches musicON flag on or off
   soundon = SwitchSfx;           // pointer to function in Game.h that switches sfxON flag on or off
+  showfps = SwitchFPSVisibility; // pointer to function in Game.h that switches displayFPS flag on or off
 
   // message colors
   text = {0xFF, 0, 0, 0};
@@ -107,9 +108,10 @@ MenuState::MenuState ()
     menu_highscores.push_back (Highscore_Text (std::make_tuple (RenderText((iter->first).c_str ())), false, std::make_tuple (RenderText(IntToStr (iter->second).c_str ()))));
 
   //creating menu option objects
-  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Show FPS")), false, showfps, std::make_tuple (RenderText("ON")), std::make_tuple (RenderText("OFF")), g_GamePtr->isFPSVisible (), SHOWFPS));
-  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Music")), false, musicon, std::make_tuple (RenderText("ON")), std::make_tuple (RenderText("OFF")), g_GamePtr->GetMusic ()->isMusicOn (), MUSICON));
-  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Sounds")), false, soundon, std::make_tuple (RenderText("ON")), std::make_tuple (RenderText("OFF")), g_GamePtr->isSfxOn (), SOUNDON));
+  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Control")), false, switchcontrol, std::make_tuple (RenderText ("KEYBOARD")), std::make_tuple (RenderText ("MOUSE")), g_GamePtr->GetControl () == KEYBOARD, CONTROL));
+  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Music")), false, musicon, std::make_tuple (RenderText ("ON")), std::make_tuple (RenderText ("OFF")), g_GamePtr->GetMusic ()->isMusicOn (), MUSICON));
+  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Sounds")), false, soundon, std::make_tuple (RenderText ("ON")), std::make_tuple (RenderText ("OFF")), g_GamePtr->isSfxOn (), SOUNDON));
+  menu_options.push_back (OptionsText (std::make_tuple (RenderText("Show FPS")), false, showfps, std::make_tuple (RenderText ("ON")), std::make_tuple (RenderText ("OFF")), g_GamePtr->isFPSVisible (), SHOWFPS));
 }
 
 void

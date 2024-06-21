@@ -8,15 +8,16 @@
 #include "ace/OS.h"
 #include "ace/Log_Msg.h"
 
+#include "Ball.h"
+#include "Block.h"
 #include "defines.h"
+#include "Effect.h"
 #include "Game.h"
 #include "GameObject.h"
-#include "Platform.h"
-#include "Ball.h"
-#include "Effect.h"
-#include "Projectile.h"
-#include "MapLoader.h"
 #include "Gui.h"
+#include "MapLoader.h"
+#include "Platform.h"
+#include "Projectile.h"
 
 PlayingState::PlayingState ()
  : inherited ()
@@ -29,6 +30,7 @@ PlayingState::PlayingState ()
  , effects (NULL)
  , projectiles (NULL)
  , gui (NULL)
+ , second_ball_flag (false) // setting up flag , second wasnt intialized yet ( pushed on the list )
 {
   char buffer_a[MAX_PATH];
   ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
@@ -89,8 +91,6 @@ PlayingState::PlayingState ()
 
   gui = new Gui ();
   gui->Init (g_GamePtr->GetScreen_W () - 135, g_GamePtr->GetScreen_H () - 35);
-
-  second_ball_flag = false; // setting up flag , second wasnt intialized yet ( pushed on the list )
 }
 
 PlayingState::~PlayingState ()
@@ -113,7 +113,7 @@ PlayingState::RenderState ()
 
   if (changingstate)
   {
-    DisplayFinishText (3000, ACE_TEXT_ALWAYS_CHAR ("Game over"));
+    DisplayFinishText (3000, levelcomplete ? ACE_TEXT_ALWAYS_CHAR ("Level complete") : ACE_TEXT_ALWAYS_CHAR ("Game over"));
     changingstate = false;
     ChangeState ();
   }
@@ -131,6 +131,21 @@ PlayingState::UpdateState ()
   for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
     if ((*iter)->Update () == -1)
       break;  // if an update function returns -1 then we break from loop because we are about to change state
+
+  levelcomplete = true;
+  for (std::list<GameObject*>::iterator iter = gobjects.begin(); iter != gobjects.end(); iter++)
+  {
+    if ((*iter)->GetID () != BLOCK)
+      continue;
+    Block* block_p = static_cast<Block*> (*iter);
+    if (block_p->GetHealth () > 0)
+    {
+      levelcomplete = false;
+      break;
+    }
+  }
+  if (levelcomplete)
+    changingstate = true;
 }
 
 void
@@ -139,15 +154,47 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
   if (keystates[SDLK_ESCAPE])
   {
     ChangeState ();
-    return; // we get the hell out of here
+    return;
   }
 
-  if (keystates[SDLK_SPACE])
-    ball->StartFlying ();
+  // *TODO*: remove these cheats
+#if defined (_DEBUG)
+  if (event.key.keysym.sym == SDLK_F1)
+  {
+    platform->MorphPlatform (MAGNET);
+    ball->MorphBall (MAGNET);
+    second_ball->MorphBall (MAGNET);
+  }
+  else if (event.key.keysym.sym == SDLK_F2)
+  {
+    platform->MorphPlatform (GUN);
+    ball->LoseEffect ();
+    second_ball->LoseEffect ();
+  }
+  else if (event.key.keysym.sym == SDLK_F3)
+  {
+    LaunchSecondBall ();
+    platform->MorphPlatform (SECONDBALL);
+    ball->LoseEffect ();
+    second_ball->LoseEffect ();
+  }
+  else if (event.key.keysym.sym == SDLK_F10)
+    platform->AddLife ();
+#endif // _DEBUG
 
   // Movement controls with keyboard
   if (control_type == KEYBOARD)
   {
+    if (keystates[SDLK_SPACE])
+    {
+      if (!ball->isAlive () ||
+          ball->IsOnPlatform ())
+        ball->StartFlying ();
+      else if (second_ball->isAlive () &&
+               second_ball->IsOnPlatform ())
+        second_ball->StartFlying ();
+    }
+
     if (keystates[SDLK_LEFT])
       platform->MoveLeft ();
     else if (keystates[SDLK_RIGHT])
@@ -156,8 +203,10 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
       platform->StopMoving ();
 
     if (event.type == SDL_KEYDOWN)
+    {
       if (event.key.keysym.sym == SDLK_x)
         platform->Shoot ();
+    }
   }
   else if (control_type == MOUSE)
   {
@@ -169,6 +218,21 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
       platform->MoveLeft ();
     else
       platform->StopMoving ();
+
+    if (event.button.type == SDL_MOUSEBUTTONDOWN)
+    {
+      if (event.button.button == 1)
+        platform->Shoot ();
+      else if (event.button.button == 2)
+      {
+        if (!ball->isAlive () ||
+            ball->IsOnPlatform ())
+          ball->StartFlying ();
+        else if (second_ball->isAlive () &&
+                 second_ball->IsOnPlatform ())
+          second_ball->StartFlying ();
+      }
+    }
   }
 }
 
@@ -182,9 +246,9 @@ PlayingState::InitState ()
 void
 PlayingState::SaveHighscores ()
 {
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
+  char buffer_a[MAX_PATH];
+  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
@@ -209,9 +273,30 @@ PlayingState::LaunchSecondBall ()
                                  t_dirX, t_dirY,
                                  ball->GetBoundX (), ball->GetBoundY ());
   second_ball->SetAlive (true);
+
   if (!second_ball_flag)
   {
     gobjects.push_back (second_ball);
     second_ball_flag = true;
   }
+}
+
+void
+PlayingState::SwitchBalls ()
+{
+  GameObject* temp_p = second_ball;
+  second_ball = ball;
+  ball = static_cast<Ball*> (temp_p);
+
+  //ACE_ASSERT (second_ball_flag);
+  //std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+  //for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+  //  if (*iter == temp_p)
+  //  {
+  //    iter_2 = iter;
+  //    break;
+  //  } // end IF
+  //ACE_ASSERT (iter_2 != gobjects.end ());
+  //gobjects.erase (iter_2);
+  //second_ball_flag = false;
 }

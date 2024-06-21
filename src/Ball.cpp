@@ -40,10 +40,11 @@ Ball::Destroy ()
 void
 Ball::Init ()
 {
-  float posX = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->GetX ();
-  float posY = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->GetY ();
+  Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
+  float posX = platform->GetX ();
+  float posY = platform->GetY ();
   int t_dirX = (ACE_OS::rand () % 2 + 1) * 2 - 3; //  picking random direction either left or right
-  inherited::Init (posX, posY - static_cast<float> (animation->GetFrameHeight () / 2),
+  inherited::Init (posX, posY - (animation->GetFrameHeight () / 2.0f),
                    static_cast<float> (ACE_OS::rand () % 1 + 3), static_cast<float> (ACE_OS::rand () % 1 + 3),
                    t_dirX, -1,
                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
@@ -73,7 +74,7 @@ Ball::Update ()
   {
     Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
     x = platform->GetX ();
-    y = platform->GetY () - 15;
+    y = platform->GetY () - 20.0f;
   }
   else
   {
@@ -89,9 +90,21 @@ Ball::Update ()
     {
       SetAlive (false);
       LoseEffect ();
-      Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
-      platform->LoseLife ();
-      platform->MorphPlatform (-1); // calling platform to lose it's effect because ball has just died
+
+      PlayingState* playing_state_p = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      ACE_ASSERT (playing_state_p);
+      Ball* second_ball_p = playing_state_p->GetSecondBall ();
+      if (this == second_ball_p)
+        return 0;
+
+      if (second_ball_p->isAlive ())
+        playing_state_p->SwitchBalls ();
+      else
+      {
+        Platform* platform = playing_state_p->GetPlatform ();
+        platform->LoseLife ();
+        platform->MorphPlatform (-1); // calling platform to lose it's effect because (last) ball has just died
+      }
     }
   }
   
@@ -100,6 +113,25 @@ Ball::Update ()
     animation->Animate ();
 
   return 0;
+}
+
+bool
+Ball::IsOnPlatform ()
+{
+  // sanity check(s): initial situation ?
+  PlayingState* playing_state_p = dynamic_cast<PlayingState*> (g_GamePtr->GetState());
+  ACE_ASSERT (playing_state_p);
+  Ball* ball_p = playing_state_p->GetBall ();
+  if (ball_p == this && !this->isAlive ())
+    return true;
+
+  return stand_on_platform;
+  //  return false;
+
+  //Platform* platform_p = playing_state_p->GetPlatform ();
+  //ACE_ASSERT (platform_p);
+
+  //return inherited::y <= platform_p->GetY () - 20.0f;
 }
 
 void
@@ -114,12 +146,13 @@ Ball::StartFlying ()
   else if (stand_on_platform)
   {
     stand_on_platform = false;
-    Update ();                   //making sure that it will escape platform
+    Update (); //*TODO*: make sure that it will 'escape' platform
+    Update ();
   }
 }
 
 void
-Ball::Collided (int ObjectID, col_dir dir)
+Ball::Collided (int ObjectID, enum col_dir dir)
 {
   if (dir == NO_COLLISION)
     return;
@@ -152,19 +185,22 @@ Ball::Collided (int ObjectID, col_dir dir)
           break;
       }
 
-      if (velX < 0)
-        velX -= 0.2f;
-      else
-        velX += 0.2f;
-      if (velY < 0)
-        velY -= 0.2f;
-      else
-        velY += 0.2f;
+      if (stand_on_platform == false)
+      {
+        if (velX < 0)
+          velX -= 0.2f;
+        else
+          velX += 0.2f;
+        if (velY < 0)
+          velY -= 0.2f;
+        else
+          velY += 0.2f;
 
-      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
+        dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
 
-      if (g_GamePtr->isSfxOn ())
-        Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+        if (g_GamePtr->isSfxOn ())
+          Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+      } // end IF
     }
   }
   else if (ObjectID == BLOCK)

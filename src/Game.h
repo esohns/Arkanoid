@@ -27,8 +27,9 @@ std::string IntToStr (int n);
 void DisplayFinishText (unsigned int ms, const char* text);
 
 //forward declaration for use as callback functions
-void SwitchFPSVisibility ();
+void SwitchControl ();
 void SwitchSfx ();
+void SwitchFPSVisibility();
 void ChangeState ();
 void ShutDown ();
 
@@ -48,6 +49,7 @@ class Game
   inline void SetScreen_H (int screen_h_in) { screen_h = screen_h_in; }
   inline int GetScreen_H () { return screen_h; }
 
+  inline int GetControl () { return control_type; }
   inline bool isSfxOn () { return sfxOn; }
 
   inline bool isFPSVisible () { return displayFPS; }
@@ -61,8 +63,9 @@ class Game
 
   friend void ChangeState ();
   friend void ShutDown ();
-  friend void SwitchFPSVisibility ();
+  friend void SwitchControl ();
   friend void SwitchSfx ();
+  friend void SwitchFPSVisibility();
 
   static void Draw (SDL_Surface*, SDL_Surface*, int, int);  // helper function for drawing
 

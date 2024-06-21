@@ -115,7 +115,7 @@ Music::Music (const std::string& baseDirectory_in,
  , music_ (NULL)
  , musicDirectory_ ()
  , musicFiles_ ()
- , randomSeed_ (1)
+ , randomSeed_ (0)
  , repeat_ (false)
  , currentIndex_ (-1)
 {
@@ -125,18 +125,19 @@ Music::Music (const std::string& baseDirectory_in,
   musicDirectory_ = baseDirectory_in;
   if (musicDirectory_.empty ())
   {
-    char buffer[MAX_PATH];
-    ACE_OS::getcwd (buffer, sizeof (buffer));
-    musicDirectory_ = buffer;
-    musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR;
+    char buffer_a[MAX_PATH];
+    ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+    musicDirectory_ = buffer_a;
+    musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR_A;
     musicDirectory_ += RESOURCE_DIRECTORY;
   }
-  musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR;
+  musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR_A;
   musicDirectory_ += SOUNDS_DIRECTORY;
   update (musicDirectory_, type_in);
 
   randomSeed_ = static_cast<unsigned int> (ACE_OS::time (NULL));
-  ACE_OS::srand (randomSeed_);
+  // *NOTE*: already done in main !
+  //ACE_OS::srand (randomSeed_);
 
   next (false);
 }
@@ -183,7 +184,7 @@ Music::play (const std::string& filename_in,
     return;
   }
   std::string filename = musicDirectory_;
-  filename += ACE_DIRECTORY_SEPARATOR_STR;
+  filename += ACE_DIRECTORY_SEPARATOR_STR_A;
   filename += musicFiles_[currentIndex_];
   music_ = Mix_LoadMUS (filename.c_str ());
   if (!music_)
@@ -217,13 +218,12 @@ Music::next (bool startPlaying_in)
   {
     if (music_)
     {
-      Mix_FreeMusic (music_);
-      music_ = NULL;
+      Mix_FreeMusic (music_); music_ = NULL;
     }
 
     currentIndex_ = (ACE_OS::rand_r (&randomSeed_) % musicFiles_.size ());
     std::string filename = musicDirectory_;
-    filename += ACE_DIRECTORY_SEPARATOR_STR;
+    filename += ACE_DIRECTORY_SEPARATOR_STR_A;
     filename += musicFiles_[currentIndex_];
     music_ = Mix_LoadMUS (filename.c_str ());
     if (!music_)

@@ -82,9 +82,11 @@ Block::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
+
     //Performing boundry checking
     if (x > g_Game.GetScreen_W () - boundX || x < boundX)
       dirX *= -1;
+
     //Updating of animation exists
     if (animation)
       animation->Animate ();
@@ -99,6 +101,7 @@ Block::Render ()
   if (isAlive ())
   {
     GameObject::Render ();
+
     //Rendering if animation exists
     if (animation)
       animation->Draw (x - boundX, y - boundY);

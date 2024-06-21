@@ -365,6 +365,7 @@ Public License instead of this License.*/
 #define BASE_SCREEN_X            960
 #define BASE_SCREEN_Y            540
 #define BASE_GAME_FPS            30
+#define DEFAULT_CONTROL_TYPE     KEYBOARD
 #define DEFAULT_MAP_FILE         "map2.cfg"
 
 #define DEFAULT_PROJECTILES_MAX  10

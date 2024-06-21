@@ -7,15 +7,14 @@
 
 #include "SDL.h"
 
-bool Compare (const std::pair<std::string, int>&,
-              const std::pair<std::string, int>&);
+bool Compare (const std::pair<std::string, int>&, const std::pair<std::string, int>&);
 int StrToInt (const std::string&);
 
 class State
 {
  public:
   State ();
-  virtual ~State () {};
+  virtual ~State () {}
 
   virtual void HandleEvents (Uint8*, const SDL_Event&, int) = 0;
   virtual void RenderState () = 0;

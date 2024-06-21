@@ -14,7 +14,7 @@ FpsCounter::FpsCounter (int FPS_rate)
 
 };
 
-int
+bool
 FpsCounter::measureFPS ()
 {
   //Get current time
@@ -33,18 +33,12 @@ FpsCounter::measureFPS ()
     lastFrame = currentTime;
     fps++;
 
-    //next frame thus we return 1 for Renderer
-    return 1;
+    //next frame thus we return true for Renderer
+    return true;
   }
 
-  //no frame in this measure, we dont return 1 for Renderer
-  return 0;
-}
-
-int
-FpsCounter::getFPS ()
-{
-  return FPS;
+  //no frame in this measure, we return false for Renderer
+  return false;
 }
 
 // Too slow 

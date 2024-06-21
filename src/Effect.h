@@ -17,7 +17,7 @@ class Effect
   int Update ();
 
   inline void SetEffectType (int type) { effect_type = type;}
-  void Collided (int ObjectID, col_dir dir);
+  virtual void Collided (int ObjectID, enum col_dir dir);
 
  private:
   int effect_type;

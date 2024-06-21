@@ -32,7 +32,7 @@ class Music
  public:
   Music (const std::string&,    // FQ directory
          Music_t = MUSIC_MIDI); // music type
-  virtual ~Music ();
+  ~Music ();
 
   inline bool isMusicOn () { return musicOn_; }
   void play (const std::string&, // track filename

@@ -23,10 +23,11 @@ class Ball
 
   inline void MorphBall (int effect) { has_effect = effect; }
   inline void LoseEffect () { has_effect = -1;}
+  bool IsOnPlatform ();
   void StartFlying ();
 
   //respond to collision function
-  void Collided (int, col_dir);
+  virtual void Collided (int, enum col_dir);
 
  private:
   typedef GameObject inherited;

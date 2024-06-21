@@ -26,7 +26,9 @@ class Platform
   inline int GetScore () { return score; }
   inline int GetLives () { return lives; }
 
+  inline void AddLife () { ++lives; }
   inline void LoseLife () { --lives; }
+
   inline void AddPoint () { ++score; }
 
   void Collided (int, enum col_dir);

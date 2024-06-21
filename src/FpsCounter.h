@@ -6,8 +6,8 @@ class FpsCounter
  public:
   FpsCounter (int);
 
-  int measureFPS ();
-  int getFPS ();
+  bool measureFPS ();
+  inline int getFPS () { return FPS; }
 
  private:
   int fps;

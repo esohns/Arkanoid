@@ -26,10 +26,10 @@ Animation::Animation (const char* filename_in,
   frameWidth = static_cast<int>  (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * frameWidth_in);
   frameHeight = static_cast<int> (g_Game.GetScreen_H () / static_cast<float> (BASE_SCREEN_Y) * frameHeight_in);
 
-  // formjula for checking if the last row is full in spritesheet if so then we have to adjust height of a loading image
+  // formula for checking if the last row is full in spritesheet if so then we have to adjust height of a loading image
   int loading_image_w = frameWidth * animationColumns;
   int loading_image_h;
-  if ((maxFrame +1 ) % animationColumns)
+  if ((maxFrame + 1) % animationColumns)
     loading_image_h = frameHeight * ((maxFrame + 1) / animationColumns + 1);
   else
     loading_image_h = frameHeight * (((maxFrame + 1) / animationColumns));
@@ -38,7 +38,7 @@ Animation::Animation (const char* filename_in,
   image = LoadScaledBitmap (filename_in, loading_image_w, loading_image_h);
   if (image)
   {
-    clip = new SDL_Rect ();
+    clip = new struct SDL_Rect ();
     clip->x = 0;
     clip->y = 0;
     clip->w = frameWidth;
@@ -69,7 +69,7 @@ Animation::Animation (SDL_Surface* image_in,
   image = image_in;
   if (image)
   {
-    clip = new SDL_Rect ();
+    clip = new struct SDL_Rect ();
     clip->x = 0;
     clip->y = 0;
     clip->w = frameWidth;
@@ -92,13 +92,9 @@ Animation::Animate ()
   {
     curFrame += animationDirection;
     if (curFrame > maxFrame)
-    {
       curFrame = 0;
-    }
     if (curFrame < 0)
-    {
       curFrame = maxFrame;
-    }
     frameCount = 0;
 
     clip->x = (curFrame % animationColumns) * clip->w;
@@ -109,6 +105,6 @@ Animation::Animate ()
 void
 Animation::Draw (float x, float y) const
 {
-  SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
+  struct SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
   SDL_BlitSurface (image, clip, g_Game.GetScreen (), &offset);
 }

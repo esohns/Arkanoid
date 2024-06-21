@@ -36,10 +36,10 @@ class GameObject
   inline int GetID () { return ID; }
   inline void SetID (int ID_in) { ID = ID_in; }
 
-  inline int isAlive () { return alive; }
+  inline bool isAlive () { return alive; }
   inline void SetAlive (bool alive_in) { alive = alive_in; }
 
-  inline int isCollidable () { return collidable; }
+  inline bool isCollidable () { return collidable; }
   inline void setCollidable (bool collidable_in) { collidable = collidable_in; }
 
   enum col_dir detectCollision (GameObject*);

@@ -49,6 +49,7 @@ GameObject::GameObject (SDL_Surface* image,
  , dirY (0)
  , boundX (0.0f)
  , boundY (0.0f)
+ , animation (NULL)
  , alive (false)
  , collidable (true)
 {
@@ -109,7 +110,8 @@ GameObject::Render ()
 enum col_dir
 GameObject::detectCollision (GameObject* otherObject)
 {
-  if (!(Collidable () && otherObject->Collidable ()))
+  if (!(Collidable () && otherObject->Collidable ()) ||
+      (this == otherObject))
     return NO_COLLISION;
 
   float otherObjectX = otherObject->GetX ();
@@ -122,14 +124,14 @@ GameObject::detectCollision (GameObject* otherObject)
       (y + boundY > otherObjectY - otherObjectBoundY) &&
       (y - boundY < otherObjectY + otherObjectBoundY))
   {
-    if (std::abs (x - otherObjectX) < otherObjectBoundX - 5) //Vertical collision
+    if (std::abs (x - otherObjectX) < otherObjectBoundX) //Vertical collision
     {
       if (y < otherObjectY)
         return TOP;
       else
         return BOTTOM;
     }
-    else if (std::abs (y - otherObjectY) < otherObjectBoundY - 5) //Horizontal collision
+    else if (std::abs (y - otherObjectY) < otherObjectBoundY) //Horizontal collision
     {
       if (x < otherObjectX)
         return LEFT;

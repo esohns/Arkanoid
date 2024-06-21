@@ -21,13 +21,14 @@ class PlayingState
 {
  public:
   PlayingState ();
-  ~PlayingState ();
+  virtual ~PlayingState ();
 
   virtual void InitState ();
   virtual void RenderState ();
   virtual void UpdateState ();
   virtual void HandleEvents (Uint8*, const SDL_Event&, int);
 
+  inline void SetLevelCompleteFlag (bool flag) { levelcomplete = flag; }
   inline void SetChangingStateFlag (bool flag) { changingstate = flag; }
   inline bool GetChangingStateFlag () { return changingstate; }
 
@@ -35,12 +36,15 @@ class PlayingState
   inline Projectile** GetProjectiles () { return projectiles; }
   inline Platform* GetPlatform () { return platform; }
   inline Ball* GetBall () { return ball; }
+  inline Ball* GetSecondBall () { return second_ball; }
 
   void LaunchSecondBall ();
+  void SwitchBalls ();
 
  private:
   typedef State inherited;
 
+  bool                   levelcomplete;
   bool                   changingstate;
 
   std::list<GameObject*> gobjects;
@@ -53,7 +57,7 @@ class PlayingState
   Projectile**           projectiles;
   Gui*                   gui;
 
-  int                    second_ball_flag;
+  bool                   second_ball_flag;
 
   void SaveHighscores ();
 };

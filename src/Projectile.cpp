@@ -47,6 +47,10 @@ Projectile::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
+
+    if (y <= boundY)
+      SetAlive (false);
+
     if (animation)
       animation->Animate ();
   }
