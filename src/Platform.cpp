@@ -6,6 +6,7 @@
 #include "ace/Log_Msg.h"
 
 #include "Animation.h"
+#include "Ball.h"
 #include "defines.h"
 #include "Game.h"
 #include "Projectile.h"
@@ -62,12 +63,13 @@ Platform::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
-    //Performing boundry checking
+    // boundary checking
     if (x > g_Game.GetScreen_W () - boundX)
       x = g_Game.GetScreen_W () - boundX;
     else if (x < boundX)
       x = boundX;
-    //Updating of animation exists
+
+    // updating if animation exists
     if (animation)
       animation->Animate ();
   }
@@ -76,6 +78,7 @@ Platform::Update ()
   {
     PlayingState* playing_state = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
     playing_state->SetChangingStateFlag (true);
+
     char buffer_a[BUFSIZ];
     ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
     char* username = buffer_a;
@@ -90,6 +93,7 @@ Platform::Update ()
 #endif // ACE_WIN32 || ACE_WIN64
     playing_state->PushScore (username, GetScore ());
   }
+
   return 0;
 }
 
@@ -99,32 +103,15 @@ Platform::Render ()
   if (isAlive ())
   {
     GameObject::Render ();
-    //Rendering if animation exists
+
+    // render if animation exists
     if (animation)
       animation->Draw (x - boundX, y - boundY);
   }
 }
 
 void
-Platform::MoveLeft ()
-{
-  dirX = -1;
-}
-
-void
-Platform::MoveRight ()
-{
-  dirX = 1;
-}
-
-void
-Platform::StopMoving ()
-{
-  dirX = 0;
-}
-
-void
-Platform::Collided (int objectID, col_dir dir)
+Platform::Collided (int objectID, enum col_dir dir)
 {
   if (dir == NO_COLLISION)
     return;
@@ -132,7 +119,9 @@ Platform::Collided (int objectID, col_dir dir)
   if (objectID == BALL)
   {
     if (!(has_effect == MAGNET)) // if platform is under effect of Magnet then we dont want to add points constantly
-      AddPoint ();
+    {
+      //AddPoint (); // *NOTE*: point awards are handled by individual ball(s)
+    }
   }
 }
 
@@ -146,7 +135,7 @@ Platform::Shoot ()
       if (!projectiles_temp[i]->isAlive ())
       {
         projectiles_temp[i]->Init (static_cast<int> (x), static_cast<int> (y),
-                                   12);
+                                   DEFAULT_PROJECTILES_SPEED);
         return;
       }
   }

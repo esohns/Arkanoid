@@ -5,6 +5,7 @@
 #include "ace/OS.h"
 
 #include "Animation.h"
+#include "defines.h"
 #include "Game.h"
 #include "Platform.h"
 #include "PlayingState.h"
@@ -25,6 +26,7 @@ Ball::Ball (const char* filename,
               animationDirection)
  , has_effect (-1)
  , stand_on_platform (false)
+ , launching (false)
 {
   //setting ID and calling superclass constructor
   SetID (BALL);
@@ -40,6 +42,7 @@ Ball::Destroy ()
 void
 Ball::Init ()
 {
+  // start from platorm
   Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
   float posX = platform->GetX ();
   float posY = platform->GetY ();
@@ -74,11 +77,14 @@ Ball::Update ()
   {
     Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
     x = platform->GetX ();
-    y = platform->GetY () - 20.0f;
+    y = platform->GetY () - 21.0f;
   }
   else
   {
     inherited::Update ();
+
+    if (launching && !IsOnPlatform ())
+      launching = false;
 
     // we do a boundary checking
     if ((x >= (g_Game.GetScreen_W () - boundX)) || (x <= boundX))
@@ -115,23 +121,22 @@ Ball::Update ()
   return 0;
 }
 
+void
+Ball::LoseEffect ()
+{
+  has_effect = -1;
+  
+  stand_on_platform = false;
+  while (IsOnPlatform ())
+    Update (); //*NOTE*: make sure that it will 'escape' platform
+}
+
 bool
 Ball::IsOnPlatform ()
 {
   // sanity check(s): initial situation ?
-  PlayingState* playing_state_p = dynamic_cast<PlayingState*> (g_GamePtr->GetState());
-  ACE_ASSERT (playing_state_p);
-  Ball* ball_p = playing_state_p->GetBall ();
-  if (ball_p == this && !this->isAlive ())
-    return true;
-
-  return stand_on_platform;
-  //  return false;
-
-  //Platform* platform_p = playing_state_p->GetPlatform ();
-  //ACE_ASSERT (platform_p);
-
-  //return inherited::y <= platform_p->GetY () - 20.0f;
+  Platform* platform = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
+  return (platform->detectCollision (this) != NO_COLLISION);
 }
 
 void
@@ -140,14 +145,15 @@ Ball::StartFlying ()
   // starting the ball, if it's not alive we dont allow for starting it again, until it dies
   if (!isAlive ())
   {
+    launching = true;
     SetAlive (true);
     Init ();
   }
   else if (stand_on_platform)
   {
     stand_on_platform = false;
-    Update (); //*TODO*: make sure that it will 'escape' platform
-    Update ();
+    while (IsOnPlatform ())
+      Update (); //*NOTE*: make sure that it will 'escape' platform
   }
 }
 
@@ -157,51 +163,61 @@ Ball::Collided (int ObjectID, enum col_dir dir)
   if (dir == NO_COLLISION)
     return;
 
-  //checking for collision with PLAYER
+  // checking for collision with PLAYER
   if (ObjectID == PLAYER)
   {
-    if (has_effect == MAGNET && stand_on_platform == false)
-      stand_on_platform = true;
-    else
+    switch (dir)
     {
-      switch (dir)
-      {
-        case LEFT:
-          dirX = -1;
-          break;
-        case RIGHT:
-          dirX = 1;
-          break;
-        case TOP:
-          dirY = -1;
-          break;
-        case TLCOR:
-          dirX = -1;
-          dirY = -1;
-          break;
-        case TRCOR:
-          dirX = 1;
-          dirY = -1;
-          break;
-      }
-
-      if (stand_on_platform == false)
-      {
-        if (velX < 0)
-          velX -= 0.2f;
-        else
-          velX += 0.2f;
-        if (velY < 0)
-          velY -= 0.2f;
-        else
-          velY += 0.2f;
-
-        dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
-
-        if (g_GamePtr->isSfxOn ())
-          Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
-      } // end IF
+      case LEFT:
+        dirX = -1;
+        break;
+      case RIGHT:
+        dirX = 1;
+        break;
+      case TOP:
+        dirY = -1;
+        break;
+      case TLCOR:
+        dirX = -1;
+        dirY = -1;
+        break;
+      case TRCOR:
+        dirX = 1;
+        dirY = -1;
+        break;
     }
+
+    if (has_effect == MAGNET && stand_on_platform == false)
+    {
+      // award point once (on arrival)
+      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
+
+      if (g_GamePtr->isSfxOn ())
+        Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+
+      launching = true;
+      stand_on_platform = true;
+    }
+
+    if (!stand_on_platform)
+    {
+      if (velX < 0)
+        velX -= BALL_VELOCITY_INCREMENT;
+      else
+        velX += BALL_VELOCITY_INCREMENT;
+      if (velY < 0)
+        velY -= BALL_VELOCITY_INCREMENT;
+      else
+        velY += BALL_VELOCITY_INCREMENT;
+    } // end IF
+
+    if (!launching && !stand_on_platform)
+    {
+      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
+
+      if (g_GamePtr->isSfxOn ())
+        Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+    } // end IF
   }
   else if (ObjectID == BLOCK)
   {

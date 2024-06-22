@@ -343,36 +343,38 @@ Public License instead of this License.*/
 #define DEFINES_H
 
 #if defined (ACE_LINUX)
-#define RESOURCE_DIRECTORY       "../Arkanoid/data"
+#define RESOURCE_DIRECTORY        "../Arkanoid/data"
 #else
-#define RESOURCE_DIRECTORY       "data"
+#define RESOURCE_DIRECTORY        "data"
 #endif // ACE_LINUX
-#define GRAPHICS_DIRECTORY       "graphics"
-#define SOUNDS_DIRECTORY         "sounds"
+#define GRAPHICS_DIRECTORY        "graphics"
+#define SOUNDS_DIRECTORY          "sounds"
 
-#define PLATFORM_BASE_SPEED      7.0f
+#define BALL_VELOCITY_INCREMENT   0.2f
+#define PLATFORM_BASE_SPEED       7.0f
 
-#define SOUNDS_MIDI_EXT          "mid"
-#define SOUNDS_MP3_EXT           "mp3"
-#define SOUNDS_MUSIC_FADE_PERIOD 1000 // ms
-#define SOUNDS_MUSIC_VOLUME      48   // [0-128]
+#define SOUNDS_MIDI_EXT           "mid"
+#define SOUNDS_MP3_EXT            "mp3"
+#define SOUNDS_MUSIC_FADE_PERIOD  1000 // ms
+#define SOUNDS_MUSIC_VOLUME       48   // [0-128]
 
-#define SMALL_FONT_SIZE          14  // point size
-#define MEDIUM_FONT_SIZE         28  // point size
-#define LARGE_FONT_SIZE          35  // point size
-#define HUGE_FONT_SIZE           70  // point size
+#define SMALL_FONT_SIZE           14  // point size
+#define MEDIUM_FONT_SIZE          28  // point size
+#define LARGE_FONT_SIZE           35  // point size
+#define HUGE_FONT_SIZE            70  // point size
 
-#define BASE_SCREEN_X            960
-#define BASE_SCREEN_Y            540
-#define BASE_GAME_FPS            30
-#define DEFAULT_CONTROL_TYPE     KEYBOARD
-#define DEFAULT_MAP_FILE         "map2.cfg"
+#define BASE_SCREEN_X             960
+#define BASE_SCREEN_Y             540
+#define BASE_GAME_FPS             30
+#define DEFAULT_CONTROL_TYPE      KEYBOARD
+#define DEFAULT_MAP_FILE          "map2.cfg"
 
-#define DEFAULT_PROJECTILES_MAX  10
+#define DEFAULT_PROJECTILES_MAX   10
+#define DEFAULT_PROJECTILES_SPEED 15
 
-#define KEYBOARD                 0
-#define MOUSE                    1
+#define KEYBOARD                  0
+#define MOUSE                     1
 
-#define WINDOW_CAPTION           "Arkanoid"
+#define WINDOW_CAPTION            "Arkanoid"
 
 #endif // DEFINES_H

@@ -11,27 +11,36 @@
 
 #define RenderTextColor(_text, _color) TTF_RenderText_Solid (font, _text, _color) // helpful macro for rendering text with color
 // macro for placing 3 SDL_Surfaces in different colours defined as below
-#define RenderText(_text) TTF_RenderText_Solid(font, _text, text),\
-                          TTF_RenderText_Solid(font, _text, shade),\
+#define RenderText(_text) TTF_RenderText_Solid(font, _text, text),   \
+                          TTF_RenderText_Solid(font, _text, shade),  \
                           TTF_RenderText_Solid(font, _text, highlight)
 
 MenuState::MenuState ()
  : inherited ()
- //, bgs ()
- //, menu_main ()
- //, menu_highscores ()
- //, menu_options ()
+ , bgs ()
+ , menu_main ()
+ , menu_highscores ()
+ , menu_options ()
  , mouse_pos_x (-1)
  , mouse_pos_y (-1)
- , offsetX (g_GamePtr->GetScreen_W () / 2)
+ , offsetX ((g_GamePtr->GetScreen_W () / 2) - 250)
  , offsetY ((g_GamePtr->GetScreen_H () / 2) - 50)
  , distance_between_msg (50)
  , distance_between_opt (300)
  , curMenu (MAIN_MENU)
- //, text ()
- //, shade ()
- //, highlight ()
+ , text ()
+ , shade ()
+ , highlight ()
  , font (NULL)
+ , startgame (NULL)
+ , options (NULL)
+ , highscores (NULL)
+ , quit (NULL)
+ , mainmenu (NULL)
+ , switchcontrol (NULL)
+ , musicon (NULL)
+ , soundon (NULL)
+ , showfps (NULL)
 {
   char buffer_a[MAX_PATH];
   ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
@@ -103,11 +112,11 @@ MenuState::MenuState ()
   menu_main.push_back (MainMenuText (std::make_tuple (RenderText("Highscores")), false, highscores));
   menu_main.push_back (MainMenuText (std::make_tuple (RenderText("Quit")), false, quit));
 
-  //creating highscore objects
+  // creating highscore objects
   for (std::list<std::pair<std::string, int> >::iterator iter = highsco_list.begin (); iter != highsco_list.end (); iter++)
     menu_highscores.push_back (Highscore_Text (std::make_tuple (RenderText((iter->first).c_str ())), false, std::make_tuple (RenderText(IntToStr (iter->second).c_str ()))));
 
-  //creating menu option objects
+  // creating menu option objects
   menu_options.push_back (OptionsText (std::make_tuple (RenderText("Control")), false, switchcontrol, std::make_tuple (RenderText ("KEYBOARD")), std::make_tuple (RenderText ("MOUSE")), g_GamePtr->GetControl () == KEYBOARD, CONTROL));
   menu_options.push_back (OptionsText (std::make_tuple (RenderText("Music")), false, musicon, std::make_tuple (RenderText ("ON")), std::make_tuple (RenderText ("OFF")), g_GamePtr->GetMusic ()->isMusicOn (), MUSICON));
   menu_options.push_back (OptionsText (std::make_tuple (RenderText("Sounds")), false, soundon, std::make_tuple (RenderText ("ON")), std::make_tuple (RenderText ("OFF")), g_GamePtr->isSfxOn (), SOUNDON));
@@ -263,20 +272,33 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
 
   switch (curMenu)
   {
+    case MAIN_MENU:
+    {
+      if (keystates[SDLK_ESCAPE])
+      {
+        quit ();
+        return;
+      }
+      break;
+    }
     case OPTIONS:
+    {
       if (keystates[SDLK_ESCAPE])
       {
         GotoMainMenu ();
         return;
       }
       break;
+    }
     case HIGHSCORES:
+    {
       if (keystates[SDLK_ESCAPE])
       {
         GotoMainMenu ();
         return;
       }
       break;
+    }
     default:
       break;
   }

@@ -15,9 +15,9 @@ class Platform
   int Update ();
   void Render ();
 
-  void MoveLeft ();
-  void MoveRight ();
-  void StopMoving ();
+  inline void MoveLeft () { dirX = -1; }
+  inline void MoveRight () { dirX = 1; }
+  inline void StopMoving () { dirX = 0; }
 
   void Shoot ();
 

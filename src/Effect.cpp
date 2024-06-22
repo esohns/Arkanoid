@@ -81,12 +81,15 @@ Effect::Collided (int ObjectID, enum col_dir dir)
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
       ps->GetBall ()->MorphBall (effect_type);
+      ps->GetSecondBall ()->MorphBall (effect_type);
       SetAlive (false);
     }
     else if (effect_type == GUN)
     {
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
+      ps->GetBall ()->LoseEffect ();
+      ps->GetSecondBall ()->LoseEffect ();
       SetAlive (false);
     }
     else if (effect_type == SECONDBALL)
@@ -94,6 +97,8 @@ Effect::Collided (int ObjectID, enum col_dir dir)
       dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->LaunchSecondBall ();
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
+      ps->GetBall ()->LoseEffect ();
+      ps->GetSecondBall ()->LoseEffect ();
       SetAlive (false);
     }
   }

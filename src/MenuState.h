@@ -60,8 +60,8 @@ class MenuState
   int                       mouse_pos_x;
   int                       mouse_pos_y;
 
-  int                       offsetX;    // offset from top to first menu message
-  int                       offsetY;    // offset from left to menu messages
+  int                       offsetX;    // offset from left to first menu message
+  int                       offsetY;    // offset from top to menu messages
 
   int                       distance_between_msg;       // vertical distance between consecutive MSGs
   int                       distance_between_opt;       // horizontal distance between Option and value

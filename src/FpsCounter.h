@@ -6,15 +6,17 @@ class FpsCounter
  public:
   FpsCounter (int);
 
-  bool measureFPS ();
+  bool measureFPS (); // return value: render next frame ?
   inline int getFPS () { return FPS; }
+
+  void RenderFPS (int, int);
 
  private:
   int fps;
   int lastTime;
   int lastFrame;
   int FPS;
-  int frameDelay;
+  int frameDelay; // ms
 };
 
 #endif /* defined(__Arkanoid__FpsCounter__) */

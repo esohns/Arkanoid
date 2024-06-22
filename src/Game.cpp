@@ -105,7 +105,9 @@ Game::initSystems ()
                 ACE_TEXT (SDL_GetError ())));
     return -1;
   } // end IF
-  screen = SDL_SetVideoMode (screen_w, screen_h, 32, SDL_SWSURFACE);
+  Uint32 flags_i = SDL_DOUBLEBUF;
+  flags_i |= SDL_SWSURFACE;
+  screen = SDL_SetVideoMode (screen_w, screen_h, 32, flags_i);
 
   if (TTF_Init () < 0)
   {
@@ -183,6 +185,8 @@ Game::Loop ()
       char buffer_a[10] = {0};
       ::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
       SDL_WM_SetCaption (buffer_a, NULL);
+
+      //fps_counter->RenderFPS (30, 30);
     } // end IF
     else
       SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
@@ -269,8 +273,8 @@ Game::Draw (SDL_Surface* screen,
             SDL_Surface* source,
             int x, int y)
 {
-  SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
-  SDL_Rect clip = {0, 0, (Uint16)source->w, (Uint16)source->h};
+  struct SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
+  struct SDL_Rect clip = {0, 0, (Uint16)source->w, (Uint16)source->h};
   SDL_BlitSurface (source, &clip, screen, &offset);
 }
 

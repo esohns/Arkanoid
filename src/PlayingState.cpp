@@ -221,9 +221,9 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
 
     if (event.button.type == SDL_MOUSEBUTTONDOWN)
     {
-      if (event.button.button == 1)
+      if (event.button.button == SDL_BUTTON_LEFT)
         platform->Shoot ();
-      else if (event.button.button == 2)
+      else if (event.button.button == SDL_BUTTON_MIDDLE)
       {
         if (!ball->isAlive () ||
             ball->IsOnPlatform ())

@@ -4,6 +4,8 @@
 
 #include "SDL.h"
 
+#include "Game.h"
+
 FpsCounter::FpsCounter (int FPS_rate)
  : fps (0)
  , lastTime (0)
@@ -42,9 +44,13 @@ FpsCounter::measureFPS ()
 }
 
 // Too slow 
-//void FpsCounter::RenderFPS(int x, int y){
-//    SDL_Color col = {0xcc,0xcc,0xcc,0};
-//    fps_message  = TTF_RenderText_Solid(g_GamePtr->GetMainFont(), IntToStr(FPS), col);
-//    
-//    Game::Draw(g_GamePtr->GetScreen(), fps_message, x, y);
-//}
+void
+FpsCounter::RenderFPS (int x, int y)
+{
+  static struct SDL_Color col = {0xcc , 0xcc, 0xcc, 0};
+  SDL_Surface* fps_message = TTF_RenderText_Solid (g_GamePtr->GetMainFont (), IntToStr (FPS).c_str (), col);
+
+  Game::Draw (g_GamePtr->GetScreen (), fps_message, x, y);
+
+  SDL_FreeSurface (fps_message);
+}

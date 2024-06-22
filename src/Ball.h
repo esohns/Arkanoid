@@ -22,7 +22,7 @@ class Ball
   int Update ();
 
   inline void MorphBall (int effect) { has_effect = effect; }
-  inline void LoseEffect () { has_effect = -1;}
+  void LoseEffect ();
   bool IsOnPlatform ();
   void StartFlying ();
 
@@ -34,6 +34,7 @@ class Ball
 
   int  has_effect;
   bool stand_on_platform;
+  bool launching; // still on platform ?
 };
 
 #endif /* defined(__Arkanoid__Ball__) */
