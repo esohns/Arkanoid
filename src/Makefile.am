@@ -3,7 +3,7 @@ METASOURCES = AUTO
 ACLOCAL_AMFLAGS = -I .
 AM_CPPFLAGS =
 
-bin_PROGRAMS = arkanoid
+bin_PROGRAMS = Arkanoid
 
 arkanoid_SOURCES = \
   Animation.h \
@@ -43,7 +43,6 @@ arkanoid_SOURCES = \
   Singleton.h \
   State.cpp \
   State.h
-arkanoid_CPPFLAGS = $(AM_CPPFLAGS) $(pkg_libs_CFLAGS)
-arkanoid_LDADD = \
+Arkanoid_CPPFLAGS = $(AM_CPPFLAGS) $(pkg_libs_CFLAGS)
+Arkanoid_LDADD = \
   $(pkg_libs_LIBS)
-

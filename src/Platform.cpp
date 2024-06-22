@@ -84,7 +84,7 @@ Platform::Update ()
     char* username = buffer_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     DWORD buffer_size = sizeof (char[BUFSIZ]);
-    if (!GetUserName (buffer_a, &buffer_size))
+    if (!GetUserNameA (buffer_a, &buffer_size))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
                   GetLastError ()));
