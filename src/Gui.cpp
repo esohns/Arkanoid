@@ -21,8 +21,8 @@ Gui::Gui ()
 {
   color = {0x0c, 0xac, 0xd0, 0};
 
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;

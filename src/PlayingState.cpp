@@ -32,8 +32,8 @@ PlayingState::PlayingState ()
  , gui (NULL)
  , second_ball_flag (false) // setting up flag , second wasnt intialized yet ( pushed on the list )
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
@@ -145,13 +145,34 @@ PlayingState::UpdateState ()
     }
   }
   if (levelcomplete)
+  {
     changingstate = true;
+
+    // *TODO*: load next level !!!
+    char buffer_a[BUFSIZ];
+    ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
+    char* username = buffer_a;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    DWORD buffer_size = sizeof (char[BUFSIZ]);
+    if (!GetUserNameA (buffer_a, &buffer_size))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
+                  GetLastError ()));
+#else
+    username = ACE_OS::getenv ("USER");
+#endif // ACE_WIN32 || ACE_WIN64
+    PushScore (username, platform->GetScore ());
+  } // end IF
 }
 
 void
 PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_type)
 {
+#if defined (SDL1_USE)
   if (keystates[SDLK_ESCAPE])
+#elif defined (SDL2_USE)
+  if (keystates[SDL_SCANCODE_ESCAPE])
+#endif // SDL1_USE || SDL2_USE
   {
     ChangeState ();
     return;
@@ -185,7 +206,11 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
   // Movement controls with keyboard
   if (control_type == KEYBOARD)
   {
+#if defined (SDL1_USE)
     if (keystates[SDLK_SPACE])
+#elif defined (SDL2_USE)
+    if (keystates[SDL_SCANCODE_SPACE])
+#endif // SDL1_USE || SDL2_USE
     {
       if (!ball->isAlive () ||
           ball->IsOnPlatform ())
@@ -195,26 +220,35 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
         second_ball->StartFlying ();
     }
 
+#if defined (SDL1_USE)
     if (keystates[SDLK_LEFT])
+#elif defined (SDL2_USE)
+    if (keystates[SDL_SCANCODE_LEFT])
+#endif // SDL1_USE || SDL2_USE
       platform->MoveLeft ();
+#if defined (SDL1_USE)
     else if (keystates[SDLK_RIGHT])
+#elif defined (SDL2_USE)
+    else if (keystates[SDL_SCANCODE_RIGHT])
+#endif // SDL1_USE || SDL2_USE
       platform->MoveRight ();
     else
       platform->StopMoving ();
 
-    if (event.type == SDL_KEYDOWN)
-    {
-      if (event.key.keysym.sym == SDLK_x)
-        platform->Shoot ();
-    }
+#if defined (SDL1_USE)
+    if (keystates[SDLK_x])
+#elif defined (SDL2_USE)
+    if (keystates[SDL_SCANCODE_X])
+#endif // SDL1_USE || SDL2_USE
+      platform->Shoot ();
   }
   else if (control_type == MOUSE)
   {
     int x; // mouse x coordinate position
     SDL_GetMouseState (&x, NULL);
-    if (x - 10 > platform->GetX ())
+    if (x - 20 > platform->GetX ())
       platform->MoveRight ();
-    else if (x + 10 < platform->GetX ())
+    else if (x + 20 < platform->GetX ())
       platform->MoveLeft ();
     else
       platform->StopMoving ();
@@ -246,18 +280,18 @@ PlayingState::InitState ()
 void
 PlayingState::SaveHighscores ()
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string filename = path_base + ACE_TEXT_ALWAYS_CHAR ("highscores");
   std::ofstream file;
-  file.open (filename.c_str ());
+  file.open (filename.c_str (), ios::binary);
 
   for (std::list<std::pair<std::string, int> >::iterator iter = highsco_list.begin (); iter != highsco_list.end (); iter++)
-    file << iter->first << ACE_TEXT_ALWAYS_CHAR (", ") << iter->second << std::endl;
+    file << iter->first << ACE_TEXT_ALWAYS_CHAR (", ") << iter->second << ACE_TEXT_ALWAYS_CHAR ("\r\n"); // write windows(TM)-style newlines
 
   file.close ();
 }

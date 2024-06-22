@@ -14,8 +14,8 @@
 #include "scaler.h"
 
 // offsets for placing blocks properly on screen such that its edges are aligned with screen edges
-#define offsetX g_Game.GetScreen_W ()/(float)BASE_SCREEN_X*value.frameWidth/2.0
-#define offsetY g_Game.GetScreen_H ()/(float)BASE_SCREEN_Y*value.frameHeight/2.0
+#define offsetX g_Game.GetScreen_W()/(float)BASE_SCREEN_X * value.frameWidth/2.0f
+#define offsetY g_Game.GetScreen_H()/(float)BASE_SCREEN_Y * value.frameHeight/2.0f
 
 // multipliers for calulating size for scaled bitmap
 #define scaleX g_Game.GetScreen_W ()/(float)BASE_SCREEN_X
@@ -42,37 +42,42 @@ MapLoader::LoadMap (const std::string& filename_in)
 
   // opening map file
   std::ifstream file;
-  file.open (filename_in.c_str ());
+  file.open (filename_in.c_str (), ios::binary);
 
   // buffer
   std::string line;
 
   // setting y-coordinate starting position
-  float posY = 0.0F;
+  float posY = 0.0f;
 
   // loading bitmaps to a map 
   LoadBitmaps ();
 
   // iterating through lines of map file
-  while (std::getline (file, line))
+  char c;
+  while (std::getline (file, line, '\r'))
   {
+    // ignore following \n or restore the buffer data
+    if ((c = file.get ()) != '\n')
+      file.rdbuf ()->sputbackc (c);
+
     // if line is empty then we continue
     if (!line.length ())
     {
-      posY += g_Game.GetScreen_H ()/20;
+      posY += g_Game.GetScreen_H () / 20;
       continue;
     }
 
     // setting x-coordinate starting position
-    float posX = 0;
+    float posX = 0.0f;
 
     //iterating through characters in line
-    for (int i=0; i<20; i++)
+    for (int i = 0; i < 20; i++)
     {
       //if we have an empty symbol we continue in a row and move posX
       if (line[i] == ' ')
       {
-        posX += g_Game.GetScreen_W ()/20;
+        posX += g_Game.GetScreen_W () / 20;
         continue;
       }
 
@@ -85,16 +90,16 @@ MapLoader::LoadMap (const std::string& filename_in)
                                    value.frameHeight,
                                    value.animationColumns,
                                    value.animationDirection);
-      g_object->Init (posX + static_cast<float>(offsetX), posY + static_cast<float>(offsetY),
+      g_object->Init (posX + static_cast<float> (offsetX), posY + static_cast<float> (offsetY),
                       value.speed,
                       value.dirX,
                       value.health);
       return_val.push_back (g_object);
 
-      posX += g_Game.GetScreen_W ()/20; // calculating X coordinate
+      posX += g_Game.GetScreen_W () / 20; // calculating X coordinate
     }
 
-    posY += g_Game.GetScreen_H ()/20;     // calculating y coordinate
+    posY += g_Game.GetScreen_H () / 20; // calculating y coordinate
   }
 
   return return_val;
@@ -106,14 +111,14 @@ MapLoader::LoadBitmaps ()
   float scalerX = g_Game.GetScreen_W ()/(float)BASE_SCREEN_X;
   float scalerY = g_Game.GetScreen_H ()/(float)BASE_SCREEN_Y;
 
-  char buffer[MAX_PATH];
-  ACE_OS::getcwd (buffer, sizeof (buffer));
-  std::string path_base = buffer;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
-  path_base += ACE_DIRECTORY_SEPARATOR_STR;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string file;
   for (std::map<char, value_t>::iterator iter = configfile->map_begin ();
        iter != configfile->map_end ();

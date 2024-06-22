@@ -58,6 +58,11 @@ class Game
   inline Music* GetMusic () { return music; }
   inline Mix_Chunk* GetSfx () { return sound; }
   inline SDL_Surface* GetScreen () { return screen; }
+#if defined (SDL2_USE)
+  inline SDL_Window* GetWindow () { return window; }
+  // inline SDL_Renderer* GetRenderer () { return renderer; }
+  // inline SDL_Texture* GetTexture () { return texture; }
+#endif // SDL2_USE
   inline State* GetState () { return game_state; }
   inline TTF_Font* GetMainFont () { return font; }
 
@@ -91,6 +96,11 @@ class Game
 
   FpsCounter*  fps_counter;
 
+#if defined (SDL2_USE)
+  SDL_Window*   window;
+  SDL_Renderer* renderer;
+  SDL_Texture*  texture;
+#endif // SDL2_USE
   SDL_Surface* screen;
   Music*       music;
   Mix_Chunk*   sound;

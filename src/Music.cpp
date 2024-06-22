@@ -125,8 +125,8 @@ Music::Music (const std::string& baseDirectory_in,
   musicDirectory_ = baseDirectory_in;
   if (musicDirectory_.empty ())
   {
-    char buffer_a[MAX_PATH];
-    ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+    char buffer_a[PATH_MAX];
+    ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
     musicDirectory_ = buffer_a;
     musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR_A;
     musicDirectory_ += RESOURCE_DIRECTORY;
@@ -176,7 +176,7 @@ Music::play (const std::string& filename_in,
        currentIndex_++)
     if (musicFiles_[currentIndex_] == filename_in)
       break;
-  if (currentIndex_ == musicFiles_.size ())
+  if (currentIndex_ == static_cast<int> (musicFiles_.size ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid/unknown filename: \"%s\", returning\n"),

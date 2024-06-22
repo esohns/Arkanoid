@@ -20,8 +20,10 @@ target_include_directories (${PROJECT_NAME} PUBLIC
 if (SDL_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              "$<BUILD_INTERFACE:${SDL_INCLUDE_DIRS}>")
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>)
+ if (WIN32)
+  target_include_directories (${PROJECT_NAME} PUBLIC
+                              $<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>)
+ endif (WIN32)
 endif (SDL_SUPPORT)
 
 target_include_directories (${PROJECT_NAME} PUBLIC
@@ -102,10 +104,22 @@ target_precompile_headers (${PROJECT_NAME}
 
 target_link_libraries (${PROJECT_NAME} PUBLIC ${ACE_LIBRARY})
 if (SDL_SUPPORT)
- target_link_libraries (${PROJECT_NAME} PUBLIC legacy_stdio_definitions.lib)
- target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL1_MAIN_LIBRARY})
+ if (SDL1_USE)
+  if (WIN32)
+   target_link_libraries (${PROJECT_NAME} PUBLIC legacy_stdio_definitions.lib)
+  endif (WIN32)
+  target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL1_MAIN_LIBRARY})
+ endif (SDL1_USE)
  target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL_LIBRARIES})
- target_link_libraries (${PROJECT_NAME} PUBLIC ${LIB_ROOT}/SDL_image/lib/${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}/SDL_image.lib)
+ if (SDL1_USE)
+  if (WIN32)
+   target_link_libraries (${PROJECT_NAME} PUBLIC ${LIB_ROOT}/SDL_image/lib/${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}/SDL_image.lib)
+  endif (WIN32)
+ elseif (SDL2_USE)
+  if (UNIX)
+   target_link_libraries (${PROJECT_NAME} PUBLIC SDL2_image.so)
+  endif (UNIX)
+ endif ()
 endif (SDL_SUPPORT)
 
 if (WIN32)

@@ -28,10 +28,10 @@ Compare (const std::pair<std::string, int>& a,
 }
 
 State::State ()
- //: highsco_list ()
+ : highsco_list ()
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
@@ -39,22 +39,23 @@ State::State ()
   filename += ACE_DIRECTORY_SEPARATOR_STR_A;
   filename += ACE_TEXT_ALWAYS_CHAR ("highscores");
   std::ifstream file;
-  file.open (filename.c_str ());
+  file.open (filename.c_str (), ios::binary);
 
   std::string line;
   size_t it = 0; // character pointer
-  while (std::getline (file, line))
+  char c;
+  while (std::getline (file, line, '\r'))
   {
+    // ignore following \n or restore the buffer data
+    if ((c = file.get ()) != '\n')
+      file.rdbuf ()->sputbackc (c);
+
     it = 0; // character pointer
-#if defined (ACE_LINUX)
-    line.erase (std::find (line.begin (), line.end (), ' '), line.end ()); //removing whitespaces
-#else
-    line.erase (remove (line.begin (), line.end (), ' '), line.end ());    //removing whitespaces
-#endif // ACE_LINUX
+    line.erase (std::remove (line.begin (), line.end (), ' '), line.end ());    //removing whitespaces
     std::string name = line.substr (0, it = line.find_first_of (","));     //getting players name
     line.erase (0, it + 1);
 
-    highsco_list.push_back (std::pair<std::string, int> (name, StrToInt (line)));
+    highsco_list.push_back (std::make_pair (name, StrToInt (line)));
   } // end WHILE
 
   file.close ();
@@ -64,6 +65,6 @@ void
 State::PushScore (const std::string& name,
                   int highscore)
 {
-  highsco_list.push_back (std::pair<std::string, int>(name, highscore));
+  highsco_list.push_back (std::make_pair (name, highscore));
   highsco_list.sort (Compare);
 }

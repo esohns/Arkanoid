@@ -4,11 +4,7 @@
 
 #include <iostream>
 
-#if defined (ACE_LINUX)
-#include "SDL/SDL_image.h"
-#else
 #include "SDL_image.h"
-#endif // ACE_LINUX
 
 #include "ace/OS.h"
 
@@ -24,16 +20,24 @@ LoadScaledBitmap (const char* filename, int width, int height)
   } // end IF
 
   // apply alpha channel
+#if defined (SDL1_USE)
   SDL_Surface* temp2 = SDL_DisplayFormatAlpha (temp);
+#elif defined (SDL2_USE)
+  SDL_Surface* temp2 = SDL_ConvertSurfaceFormat (temp,
+                                                 SDL_PIXELFORMAT_RGBA8888,
+                                                 0);
+#endif // SDL1_USE || SDL2_USE
+  ACE_ASSERT (temp2);
 
-  //scale bitmap
+  // scale bitmap
   SDL_Surface* image = ScaleSurface (temp2, width, height);
+  ACE_ASSERT (image);
 
   // delete junk
   SDL_FreeSurface (temp);
   SDL_FreeSurface (temp2);
 
-  //returning pointer to scaled bitmap
+  // returning pointer to scaled bitmap
   return image;
 }
 

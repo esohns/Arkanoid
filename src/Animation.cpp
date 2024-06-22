@@ -13,14 +13,16 @@ Animation::Animation (const char* filename_in,
                       int frameHeight_in,
                       int animationColumns_in,
                       int animationDirection_in)
- : curFrame (0)
+ : maxFrame (maxFrame_in)
+ , curFrame (0)
  , frameCount (0)
- , maxFrame (maxFrame_in)
  , frameDelay (frameDelay_in)
+ , frameWidth (0)
+ , frameHeight (0)
  , animationColumns (animationColumns_in)
  , animationDirection (animationDirection_in)
- , image (NULL)
  , clip (NULL)
+ , image (NULL)
  , freeImage (true)
 {
   frameWidth = static_cast<int>  (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * frameWidth_in);
@@ -53,14 +55,16 @@ Animation::Animation (SDL_Surface* image_in,
                       int frameHeight_in,
                       int animationColumns_in,
                       int animationDirection_in)
- : curFrame (0)
+ : maxFrame (maxFrame_in)
+ , curFrame (0)
  , frameCount (0)
- , maxFrame (maxFrame_in)
  , frameDelay (frameDelay_in)
+ , frameWidth (0)
+ , frameHeight (0)
  , animationColumns (animationColumns_in)
  , animationDirection (animationDirection_in)
- , image (NULL)
  , clip (NULL)
+ , image (NULL)
  , freeImage (false)
 {
   frameWidth  = static_cast<int> (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * frameWidth_in);

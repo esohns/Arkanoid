@@ -42,8 +42,8 @@ MenuState::MenuState ()
  , soundon (NULL)
  , showfps (NULL)
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
@@ -274,7 +274,11 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
   {
     case MAIN_MENU:
     {
+#if defined (SDL1_USE)
       if (keystates[SDLK_ESCAPE])
+#elif defined (SDL2_USE)
+      if (keystates[SDL_SCANCODE_ESCAPE])
+#endif // SDL1_USE || SDL2_USE
       {
         quit ();
         return;
@@ -283,7 +287,11 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
     }
     case OPTIONS:
     {
+#if defined (SDL1_USE)
       if (keystates[SDLK_ESCAPE])
+#elif defined (SDL2_USE)
+      if (keystates[SDL_SCANCODE_ESCAPE])
+#endif // SDL1_USE || SDL2_USE
       {
         GotoMainMenu ();
         return;
@@ -292,7 +300,11 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
     }
     case HIGHSCORES:
     {
+#if defined (SDL1_USE)
       if (keystates[SDLK_ESCAPE])
+#elif defined (SDL2_USE)
+      if (keystates[SDL_SCANCODE_ESCAPE])
+#endif // SDL1_USE || SDL2_USE
       {
         GotoMainMenu ();
         return;
@@ -303,23 +315,24 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
       break;
   }
 
-  if (event.type == SDL_MOUSEBUTTONUP)
-  {
-    if (event.button.button == SDL_BUTTON_LEFT)
+  if (event.type == SDL_MOUSEBUTTONDOWN)
+    if (event.button.type == SDL_MOUSEBUTTONDOWN)
     {
-      switch (curMenu)
+      if (event.button.button == SDL_BUTTON_LEFT)
       {
-        case MAIN_MENU:
-          RunCommand (menu_main);
-          break;
-        case OPTIONS:
-          RunCommand (menu_options);
-          break;
-        default:
-          break;
+        switch (curMenu)
+        {
+          case MAIN_MENU:
+            RunCommand (menu_main);
+            break;
+          case OPTIONS:
+            RunCommand (menu_options);
+            break;
+          default:
+            break;
+        }
       }
     }
-  }
 }
 
 inline

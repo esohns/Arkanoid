@@ -1,3 +1,5 @@
+#include "SDL_scancode.h"
+#include "SDL_video.h"
 #include "stdafx.h"
 
 #include "Game.h"
@@ -29,13 +31,18 @@ Game::Game (int argc, char* argv[])
  , gameFPS (BASE_GAME_FPS)
  , game_state (NULL)
  , fps_counter (NULL)
+#if defined (SDL2_USE)
+ , window (NULL)
+ , renderer (NULL)
+ , texture (NULL)
+#endif // SDL2_USE
  , screen (NULL)
  , music (NULL)
  , sound (NULL)
  , font (NULL)
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
 
   if (initSystems () == -1)
   {
@@ -61,7 +68,9 @@ Game::Game (int argc, char* argv[])
     ACE_OS::exit (1);
   } // end IF
 
+#if defined (SDL1_USE)
   SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
+#endif // SDL1_USE
 
   file = path_base;
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
@@ -105,9 +114,28 @@ Game::initSystems ()
                 ACE_TEXT (SDL_GetError ())));
     return -1;
   } // end IF
+#if defined (SDL1_USE)
   Uint32 flags_i = SDL_DOUBLEBUF;
   flags_i |= SDL_SWSURFACE;
   screen = SDL_SetVideoMode (screen_w, screen_h, 32, flags_i);
+#elif defined (SDL2_USE)
+  window = SDL_CreateWindow (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION),
+                             SDL_WINDOWPOS_UNDEFINED,
+                             SDL_WINDOWPOS_UNDEFINED,
+                             screen_w, screen_h,
+                             SDL_WINDOW_OPENGL);
+  ACE_ASSERT (window);
+  screen = SDL_GetWindowSurface (window);
+
+  // renderer = SDL_CreateRenderer (window, -1, 0);
+  // ACE_ASSERT (renderer);
+  // texture = SDL_CreateTexture (renderer,
+  //                              SDL_PIXELFORMAT_ARGB8888,
+  //                              SDL_TEXTUREACCESS_STREAMING,
+  //                              screen_w, screen_h);
+  // ACE_ASSERT (texture);
+#endif // SDL2_USE
+  ACE_ASSERT (screen);
 
   if (TTF_Init () < 0)
   {
@@ -133,7 +161,11 @@ Game::initSystems ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int mixer_flags_i = mixer_flags_base_i | MIX_INIT_MP3;
 #else
+#if defined (SDL1_USE)
   int mixer_flags_i = mixer_flags_base_i | MIX_INIT_OGG | MIX_INIT_FLUIDSYNTH;
+#elif defined (SDL2_USE)
+  int mixer_flags_i = mixer_flags_base_i | MIX_INIT_MP3 | MIX_INIT_OGG | MIX_INIT_MID | MIX_INIT_OPUS;
+#endif // SDL1_USE || SDL2_USE
 #endif // ACE_WIN32 || ACE_WIN64
   int result = Mix_Init (mixer_flags_i);
   if (result != mixer_flags_i)
@@ -184,14 +216,28 @@ Game::Loop ()
     {
       char buffer_a[10] = {0};
       ::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
+#if defined (SDL1_USE)
       SDL_WM_SetCaption (buffer_a, NULL);
-
+#elif defined (SDL2_USE)
+      SDL_SetWindowTitle (window, buffer_a);
+#endif // SDL1_USE || SDL2_USE
       //fps_counter->RenderFPS (30, 30);
     } // end IF
     else
+#if defined (SDL1_USE)
       SDL_WM_SetCaption (ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION), NULL);
+#elif defined (SDL2_USE)
+      SDL_SetWindowTitle (window, ACE_TEXT_ALWAYS_CHAR (WINDOW_CAPTION));
+#endif // SDL1_USE || SDL2_USE
 
+#if defined (SDL1_USE)
     SDL_Flip (screen);
+#elif defined (SDL2_USE)
+    SDL_UpdateWindowSurface (window);
+    // SDL_UpdateTexture (texture, NULL, screen->pixels, screen_w * sizeof (Uint32));
+    // SDL_RenderCopy (renderer, texture, NULL, NULL);
+    // SDL_RenderPresent (renderer);
+#endif // SDL1_USE || SDL2_USE
   } // end WHILE
 
   return 0;
@@ -202,13 +248,20 @@ Game::HandleEvents ()
 {
   union SDL_Event event;
   while (SDL_PollEvent (&event))
+  {
     if (event.type == SDL_QUIT)
       ShutDown ();
-  Uint8* keystates = SDL_GetKeyState (NULL);
-  if (keystates[SDLK_q])
-    ShutDown ();
+#if defined (SDL1_USE)
+    Uint8* keystates = SDL_GetKeyState (NULL);
+    if (keystates[SDLK_q])
+#elif defined (SDL2_USE)
+    Uint8* keystates = const_cast<Uint8*> (SDL_GetKeyboardState (NULL));
+    if (keystates[SDL_SCANCODE_Q])
+#endif // SDL1_USE || SDL2_USE
+      ShutDown ();
 
-  game_state->HandleEvents (keystates, event, control_type);
+    game_state->HandleEvents (keystates, event, control_type);
+  } // end WHILE
 }
 
 void
@@ -289,8 +342,8 @@ IntToStr (int n)
 void
 DisplayFinishText (unsigned int ms, const char* text)
 {
-  char buffer_a[MAX_PATH];
-  ACE_OS::getcwd (buffer_a, sizeof (char[MAX_PATH]));
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
@@ -320,7 +373,18 @@ DisplayFinishText (unsigned int ms, const char* text)
   ACE_ASSERT (screen_p);
   Game::Draw (screen_p, text_shade, posX - text_shade->w / 2 + 2, posY - text_shade->h / 2 + 2);
   Game::Draw (screen_p, text_image, posX - text_image->w / 2,     posY - text_image->h / 2);
+#if defined (SDL1_USE)
   SDL_Flip (screen_p);
+#elif defined (SDL2_USE)
+  SDL_UpdateWindowSurface (g_GamePtr->GetWindow ());
+  // SDL_Texture* texture_p = g_GamePtr->GetTexture ();
+  // ACE_ASSERT (texture_p);
+  // SDL_UpdateTexture (texture_p, NULL, screen_p->pixels, g_GamePtr->GetScreen_W () * sizeof (Uint32));
+  // SDL_Renderer* renderer_p = g_GamePtr->GetRenderer ();
+  // ACE_ASSERT (renderer_p);
+  // SDL_RenderCopy (renderer_p, texture_p, NULL, NULL);
+  // SDL_RenderPresent (renderer_p);
+#endif // SDL1_USE || SDL2_USE
 
   unsigned int firstMeasure = SDL_GetTicks ();
   while (SDL_GetTicks () - firstMeasure <= ms);
