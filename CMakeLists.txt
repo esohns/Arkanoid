@@ -207,8 +207,8 @@ set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})
 set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 set (CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_SOURCE_DIR}/README)
 
-set (CPACK_PACKAGE_DESCRIPTION "this is a prototype for a ARDrone quadcopter VR FPV client")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "this is a prototype for a ARDrone quadcopter VR FPV client")
+set (CPACK_PACKAGE_DESCRIPTION "this is a portable Arkanoid game")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "this is a portable Arkanoid game")
 #set (CPACK_PACKAGE_VENDOR "Vendor")
 set (CPACK_PACKAGE_CONTACT "erik.sohns@posteo.de")
 
@@ -220,7 +220,11 @@ if (UNIX)
 # set (CPACK_DEBIAN_PACKAGE_NAME )
 # set (CPACK_DEBIAN_PACKAGE_VERSION)
 # set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
- set (CPACK_DEBIAN_PACKAGE_DEPENDS "sdl")
+ if (SDL1_USE)
+  set (CPACK_DEBIAN_PACKAGE_DEPENDS "sdl12-compat, SDL_image")
+ elseif (SDL2_USE)
+  set (CPACK_DEBIAN_PACKAGE_DEPENDS "SDL2, SDL2_image")
+ endif ()
 # set (CPACK_DEBIAN_PACKAGE_MAINTAINER)
 # set (CPACK_DEBIAN_PACKAGE_DESCRIPTION)
 # set (CPACK_DEBIAN_PACKAGE_SECTION)
@@ -239,6 +243,7 @@ if (UNIX)
 # set (CPACK_DEBIAN_PACKAGE_SUGGESTS)
 # set (CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
 elseif (WIN32)
+ set (CPACK_GENERATOR "NSIS")
  #set (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
  #set (CPACK_PACKAGE_INSTALL_DIRECTORY)
  set (CPACK_NSIS_MUI_ICON ${CMAKE_CURRENT_SOURCE_DIR}/data/graphics/arkanoid.ico)
@@ -269,15 +274,15 @@ include (CPack)
 
 ################################################################################
 
-if (WIN32)
- add_custom_target (installer
-                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Arkanoid.exe)
+#if (WIN32)
+# add_custom_target (installer
+#                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Arkanoid.exe)
 
  #set (NSIS_PROJECT_FILE "${PROJECT_NAME}.nsi")
- add_custom_command (TARGET installer
-                     POST_BUILD
-                     COMMAND make_installer.bat ${CMAKE_BUILD_TYPE} ${NSIS_PROJECT_FILE}
-                     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/scripts"
-                     COMMENT "making installer..."
-                     VERBATIM)
-endif (WIN32)
+# add_custom_command (TARGET installer
+#                     POST_BUILD
+#                     COMMAND make_installer.bat ${CMAKE_BUILD_TYPE} ${NSIS_PROJECT_FILE}
+#                     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/scripts"
+#                     COMMENT "making installer..."
+#                     VERBATIM)
+#endif (WIN32)

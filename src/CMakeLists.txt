@@ -10,6 +10,15 @@ set (CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/../../y
 include (sdl)
 
 if (UNIX)
+ include (FindPkgConfig)
+ if (SDL2_USE)
+  pkg_check_modules (PKG_CONFIG_SDL2_IMAGE SDL2_image REQUIRED)
+  if (PKG_CONFIG_SDL2_IMAGE_FOUND)
+   set (SDL2_IMAGE_INCLUDE_DIRS ${PKG_CONFIG_SDL2_IMAGE_INCLUDE_DIRS})
+   set (SDL2_IMAGE_LIBRARIES ${PKG_CONFIG_SDL2_IMAGE_LIBRARIES})
+  endif (PKG_CONFIG_SDL2_IMAGE_FOUND)
+ endif (SDL2_USE)
+
  add_link_options ("LINKER:--as-needed")
 endif (UNIX)
 
@@ -20,10 +29,15 @@ target_include_directories (${PROJECT_NAME} PUBLIC
 if (SDL_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              "$<BUILD_INTERFACE:${SDL_INCLUDE_DIRS}>")
- if (WIN32)
+ if (SDL1_USE)
+  if (WIN32)
+   target_include_directories (${PROJECT_NAME} PUBLIC
+                               $<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>)
+  endif (WIN32)
+ elseif (SDL2_USE)
   target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>)
- endif (WIN32)
+                              $<BUILD_INTERFACE:${SDL2_IMAGE_INCLUDE_DIRS}>)
+ endif ()
 endif (SDL_SUPPORT)
 
 target_include_directories (${PROJECT_NAME} PUBLIC
@@ -117,22 +131,10 @@ if (SDL_SUPPORT)
   endif (WIN32)
  elseif (SDL2_USE)
   if (UNIX)
-   target_link_libraries (${PROJECT_NAME} PUBLIC SDL2_image.so)
+   target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL2_IMAGE_LIBRARIES})
   endif (UNIX)
  endif ()
 endif (SDL_SUPPORT)
-
-if (WIN32)
- set (LIB_WITH_SUFFIX "Msvcrt")
- if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-  set (LIB_WITH_SUFFIX "${LIB_WITH_SUFFIX}d")
- endif (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
-        CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
- set (LIB_WITH_SUFFIX "${LIB_WITH_SUFFIX}.lib")
-# target_link_libraries (${PROJECT_NAME} PUBLIC ${LIB_WITH_SUFFIX})
-# target_link_libraries (${PROJECT_NAME} PUBLIC Userenv.lib)
-endif ()
 
 ##########################################
 
@@ -188,7 +190,9 @@ elseif (WIN32)
  string (REPLACE "\\" "\\\\" COMMAND ${COMMAND})
  file (TO_CMAKE_PATH "${ACE_LIB_DIR}" ACE_LIB_PATH)
  file (TO_CMAKE_PATH "${SDL_LIB_DIR}" SDL_LIB_PATH)
- file (TO_CMAKE_PATH "${LIB_ROOT}\\SDL_image\\lib\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}" SDL_IMAGE_LIB_PATH)
+ if (SDL1_USE)
+  file (TO_CMAKE_PATH "${LIB_ROOT}\\SDL_image\\lib\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}" SDL_IMAGE_LIB_PATH)
+ endif (SDL1_USE)
  create_target_launcher (${PROJECT_NAME}
                          COMMAND ${COMMAND}
                          ARGS ${ARGS}

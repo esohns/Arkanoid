@@ -1,5 +1,3 @@
-#include "SDL_scancode.h"
-#include "SDL_video.h"
 #include "stdafx.h"
 
 #include "Game.h"
@@ -215,7 +213,7 @@ Game::Loop ()
     if (displayFPS)
     {
       char buffer_a[10] = {0};
-      ::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
+      ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
 #if defined (SDL1_USE)
       SDL_WM_SetCaption (buffer_a, NULL);
 #elif defined (SDL2_USE)
