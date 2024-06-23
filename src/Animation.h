@@ -13,6 +13,10 @@ class Animation
   inline bool IsAutoAnimation () { return !animationDirection; } // helper for blocks that have animation based on health
   inline void SetFrame (int curFrame_in) { curFrame = curFrame_in; } // curFrame setter for special cases
 
+  // LARGE effect
+  inline SDL_Surface* GetImage () { return image; }
+  inline void SetImage (SDL_Surface* image_in, int frameWidth_in) { image = image_in; frameWidth = frameWidth_in; clip->w = frameWidth_in; }
+
   inline int GetFrameWidth () const { return frameWidth; }
   inline int GetFrameHeight () const { return frameHeight; }
   void Animate ();                                            // Updating sprite

@@ -76,7 +76,9 @@ PlayingState::PlayingState ()
     gobjects.push_back (projectiles[i]);
   }
 
-  effects = new Effect*[3];
+  effects = new Effect*[DEFAULT_EFFECTS_MAX];
+  file = graphics_base;
+  file += ACE_TEXT_ALWAYS_CHAR ("effect.png");  
   effects[0] = new Effect (file.c_str (), 23, 4, 16, 14, 24, 1);
   effects[0]->SetEffectType (GUN);
   file = graphics_base;
@@ -87,9 +89,13 @@ PlayingState::PlayingState ()
   file += ACE_TEXT_ALWAYS_CHAR ("effect3.png");
   effects[2] = new Effect (file.c_str (), 59, 1, 60, 60, 8, 1);
   effects[2]->SetEffectType (SECONDBALL);
+  file = graphics_base;
+  file += ACE_TEXT_ALWAYS_CHAR ("effect2.png");
+  effects[3] = new Effect (file.c_str (), 10, 7, 34, 29, 11, 1);
+  effects[3]->SetEffectType (LARGE);
 
   // we push effects as last elem. beacause they have to be rendered as last objs
-  for (int i = 0; i < 3; i++)
+  for (int i = 0; i < DEFAULT_EFFECTS_MAX; i++)
     gobjects.push_back (effects[i]);
 
   gui = new Gui ();
@@ -190,6 +196,7 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
 
   // *TODO*: remove these cheats
 #if defined (_DEBUG)
+  bool is_powerup_b = false;
   if (event.type != SDL_KEYDOWN)
     goto continue_;
   if (event.key.keysym.sym == SDLK_n)
@@ -199,12 +206,14 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
     platform->MorphPlatform (MAGNET);
     ball->MorphBall (MAGNET);
     second_ball->MorphBall (MAGNET);
+    is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F2)
   {
     platform->MorphPlatform (GUN);
     ball->LoseEffect ();
     second_ball->LoseEffect ();
+    is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F3)
   {
@@ -212,10 +221,20 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
     platform->MorphPlatform (SECONDBALL);
     ball->LoseEffect ();
     second_ball->LoseEffect ();
+    is_powerup_b = true;
+  }
+  else if (event.key.keysym.sym == SDLK_F4)
+  {
+    platform->MorphPlatform (LARGE);
+    ball->LoseEffect ();
+    second_ball->LoseEffect ();
+    is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F10)
     platform->AddLife ();
 continue_:
+  if (is_powerup_b && g_GamePtr->isSfxOn ())
+    Mix_PlayChannel (-1, g_GamePtr->GetSfx (POWERUP), 0);
 #endif // _DEBUG
 
   // Movement controls with keyboard

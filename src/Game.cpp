@@ -36,7 +36,9 @@ Game::Game (int argc, char* argv[])
 #endif // SDL2_USE
  , screen (NULL)
  , music (NULL)
- , sound (NULL)
+ , collision (NULL)
+ , laser (NULL)
+ , powerup (NULL)
  , font (NULL)
 {
   char buffer_a[PATH_MAX];
@@ -56,9 +58,35 @@ Game::Game (int argc, char* argv[])
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += SOUNDS_DIRECTORY;
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
-  file += ACE_TEXT_ALWAYS_CHAR ("sfx.wav");
-  sound = Mix_LoadWAV (file.c_str ());
-  if (!sound)
+  file += ACE_TEXT_ALWAYS_CHAR ("collision.wav");
+  collision = Mix_LoadWAV (file.c_str ());
+  if (!collision)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Mix_LoadWAV: \"%s\", aborting\n"),
+                ACE_TEXT (Mix_GetError ())));
+    ACE_OS::exit (1);
+  } // end IF
+  file = path_base;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
+  file += SOUNDS_DIRECTORY;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
+  file += ACE_TEXT_ALWAYS_CHAR ("laser.wav");
+  laser = Mix_LoadWAV (file.c_str ());
+  if (!laser)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Mix_LoadWAV: \"%s\", aborting\n"),
+                ACE_TEXT (Mix_GetError ())));
+    ACE_OS::exit (1);
+  } // end IF
+  file = path_base;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
+  file += SOUNDS_DIRECTORY;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
+  file += ACE_TEXT_ALWAYS_CHAR ("powerup.wav");
+  powerup = Mix_LoadWAV (file.c_str ());
+  if (!powerup)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Mix_LoadWAV: \"%s\", aborting\n"),
@@ -143,18 +171,23 @@ Game::initSystems ()
     return -1;
   } // end IF
 
-//#define ARKANOID_DEF_FREQUENCY 48000
   if (Mix_OpenAudio (MIX_DEFAULT_FREQUENCY,
-                     //ARKANOID_DEF_FREQUENCY,
+                     //SOUNDS_DEF_FREQUENCY,
                      MIX_DEFAULT_FORMAT,
                      MIX_DEFAULT_CHANNELS,
-                     4096) < 0)
+                     1024) < 0)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Mix_OpenAudio: \"%s\", aborting\n"),
                 ACE_TEXT (Mix_GetError ())));
     return -1;
   } // end IF
+  if (Mix_AllocateChannels (SOUNDS_DEF_CHANNELS) != SOUNDS_DEF_CHANNELS)
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to Mix_AllocateChannels(%d): \"%s\", continuing\n"),
+                SOUNDS_DEF_CHANNELS,
+                ACE_TEXT (Mix_GetError ())));
+
   int mixer_flags_base_i = MIX_INIT_FLAC | MIX_INIT_MOD;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int mixer_flags_i = mixer_flags_base_i | MIX_INIT_MP3;
@@ -186,8 +219,12 @@ Game::closeSystems ()
     SDL_FreeSurface (screen);
   if (font)
     TTF_CloseFont (font);
-  if (sound)
-    Mix_FreeChunk (sound);
+  if (collision)
+    Mix_FreeChunk (collision);
+  if (laser)
+    Mix_FreeChunk (laser);
+  if (powerup)
+    Mix_FreeChunk (powerup);
   Mix_CloseAudio ();
   Mix_Quit ();
   TTF_Quit ();
@@ -260,6 +297,24 @@ Game::HandleEvents ()
 
     game_state->HandleEvents (keystates, event, control_type);
   } // end WHILE
+}
+
+Mix_Chunk*
+Game::GetSfx (enum SFX sfx_in)
+{
+  switch (sfx_in)
+  {
+    case COLLISION:
+      return collision;
+    case LASER:
+      return laser;
+    case POWERUP:
+      return powerup;
+    default:
+      break;
+  } // end SWITCH
+
+  return NULL;
 }
 
 void

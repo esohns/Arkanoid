@@ -36,7 +36,7 @@ Animation::Animation (const char* filename_in,
   else
     loading_image_h = frameHeight * (((maxFrame + 1) / animationColumns));
 
-  //loading image to SDL_Surface* with new width and height
+  // loading image to SDL_Surface* with new width and height
   image = LoadScaledBitmap (filename_in, loading_image_w, loading_image_h);
   if (image)
   {

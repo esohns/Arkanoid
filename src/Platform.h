@@ -34,9 +34,13 @@ class Platform
   void Collided (int, enum col_dir);
 
  private:
-  int lives;
-  int score;
-  int has_effect;
+  int          lives;
+  int          score;
+  int          has_effect;
+
+  // LARGE effect ?
+  float        temp_bound_x; 
+  SDL_Surface* temp_image;
 };
 
 #endif /* defined(__Arkanoid__Platform__) */

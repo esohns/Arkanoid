@@ -11,6 +11,7 @@
 #include "Game.h"
 #include "Projectile.h"
 #include "PlayingState.h"
+#include "scaler.h"
 
 Platform::Platform (const char* filename,
                     int maxFrame,
@@ -26,7 +27,11 @@ Platform::Platform (const char* filename,
                frameHeight,
                animationColumns,
                animationDirection)
+ , lives (PLATFORM_DEFAULT_LIVES)
+ , score (0)
  , has_effect (-1)
+ , temp_bound_x (boundX)
+ , temp_image (NULL)
 {
   //setting ID to PLAYER and calling superclass constructor
   SetID (PLAYER);
@@ -42,18 +47,14 @@ Platform::Destroy ()
 void
 Platform::Init ()
 {
-  // Initializing ball
-  GameObject::Init (g_Game.GetScreen_W () / 2.0f,
-                    static_cast<float> (g_Game.GetScreen_H ()) - 10.0f,
-                    PLATFORM_BASE_SPEED,
-                    0.0f,
-                    0,
-                    0,
-                    animation->GetFrameWidth () / 2.0f,
-                    animation->GetFrameHeight () / 2.0f);
+  // Initializing platform
+  GameObject::Init (g_Game.GetScreen_W () / 2.0f, static_cast<float> (g_Game.GetScreen_H ()) - 10.0f,
+                    PLATFORM_BASE_SPEED, 0.0f,
+                    0, 0,
+                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 
-  lives = 5;
+  lives = PLATFORM_DEFAULT_LIVES;
   score = 0;
 }
 
@@ -74,7 +75,7 @@ Platform::Update ()
       animation->Animate ();
   }
 
-  if (!GetLives ())
+  if (!lives)
   {
     PlayingState* playing_state = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
     playing_state->SetChangingStateFlag (true);
@@ -116,13 +117,13 @@ Platform::Collided (int objectID, enum col_dir dir)
   if (dir == NO_COLLISION)
     return;
 
-  if (objectID == BALL)
-  {
-    if (!(has_effect == MAGNET)) // if platform is under effect of Magnet then we dont want to add points constantly
-    {
+  //if (objectID == BALL)
+  //{
+    //if (!(has_effect == MAGNET)) // if platform is under effect of Magnet then we dont want to add points constantly
+    //{
       //AddPoint (); // *NOTE*: point awards are handled by individual ball(s)
-    }
-  }
+    //}
+  //}
 }
 
 void
@@ -136,14 +137,57 @@ Platform::Shoot ()
       {
         projectiles_temp[i]->Init (static_cast<int> (x), static_cast<int> (y),
                                    DEFAULT_PROJECTILES_SPEED);
-        return;
-      }
-  }
+
+        if (g_GamePtr->isSfxOn ())
+          Mix_PlayChannel (-1, g_GamePtr->GetSfx (LASER), 0);
+
+        break;
+      } // end IF
+  } // end IF
 }
 
 void
 Platform::MorphPlatform (int effect_type)
 {
+  static int frame_width_i = 0;
+
+  if (has_effect == LARGE && effect_type != LARGE)
+  {
+    boundX = temp_bound_x;
+    SDL_FreeSurface (animation->GetImage ());
+    animation->SetImage (temp_image, frame_width_i); temp_image = NULL;
+  } // end IF
+
   has_effect = effect_type;
   animation->SetFrame (effect_type + 1);
+
+  if (has_effect == LARGE)
+  {
+    temp_bound_x = boundX;
+    boundX *= 2.0f;
+    temp_image = animation->GetImage ();
+    
+    char buffer_a[PATH_MAX];
+    ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
+    std::string path_base = buffer_a;
+    path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
+    path_base += ACE_TEXT_ALWAYS_CHAR (RESOURCE_DIRECTORY);
+    path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
+    std::string graphics_base = path_base;
+    graphics_base += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
+    graphics_base += ACE_DIRECTORY_SEPARATOR_STR_A;
+    std::string file = graphics_base;
+    file += ACE_TEXT_ALWAYS_CHAR ("platformw.png");
+
+    struct SDL_Rect rect_s = { 0, 0, 66, 18 };
+    SDL_Surface* temp = LoadCroppedBitmap (file.c_str (), rect_s);
+    ACE_ASSERT (temp);
+    frame_width_i = static_cast<int>  (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * 66);
+    int frameHeight = static_cast<int> (g_Game.GetScreen_H () / static_cast<float> (BASE_SCREEN_Y) * 18);
+    SDL_Surface* temp2 = ScaleSurface (temp, frame_width_i * 2, frameHeight);
+    ACE_ASSERT (temp2);
+    SDL_FreeSurface (temp); temp = NULL;
+
+    animation->SetImage (temp2, frame_width_i * 2); temp2 = NULL;
+  } // end IF
 }

@@ -200,7 +200,7 @@ Ball::Collided (int ObjectID, enum col_dir dir)
       static_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
 
       if (g_GamePtr->isSfxOn ())
-        Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+        Mix_PlayChannel (-1, g_GamePtr->GetSfx (COLLISION), 0);
 
       launching = true;
       stand_on_platform = true;
@@ -223,7 +223,7 @@ Ball::Collided (int ObjectID, enum col_dir dir)
       static_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
 
       if (g_GamePtr->isSfxOn ())
-        Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+        Mix_PlayChannel (-1, g_GamePtr->GetSfx (COLLISION), 0);
     } // end IF
   }
   else if (ObjectID == BLOCK)

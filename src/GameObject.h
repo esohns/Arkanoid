@@ -5,7 +5,7 @@
 
 enum OBJECT_TYPE {PLAYER, BALL, BLOCK, EFFECT, PROJECTILE};                          // enum for defining an object, used during collisions
 enum col_dir {NO_COLLISION, LEFT, RIGHT, TOP, BOTTOM, TLCOR, TRCOR, BLCOR, BRCOR};  // enum for indicating how objects collided, COR stands for corner
-enum EFFECT_TYPE {GUN, MAGNET, SECONDBALL};
+enum EFFECT_TYPE {GUN, MAGNET, SECONDBALL, LARGE};
 
 // forward declarations
 class Animation;

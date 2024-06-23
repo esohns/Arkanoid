@@ -42,12 +42,12 @@ LoadScaledBitmap (const char* filename, int width, int height)
 }
 
 SDL_Surface*
-ScaleSurface (SDL_Surface* Surface, Uint16 Width, Uint16 Height)  // doesnt delete source bitmap, but we deal with it in LoadScaledBitmap
+ScaleSurface (SDL_Surface* Surface, int Width, int Height)  // doesnt delete source bitmap, but we deal with it in LoadScaledBitmap
 {
-  // if source is null pointer or height/width is not specified then return NULL
-  if (!Surface ||
-      !Width   || !Height)
-    return NULL;
+  //// if source is null pointer or height/width is not specified then return NULL
+  //if (!Surface ||
+  //    !Width   || !Height)
+  //  return NULL;
 
   // create bitmap for a scaled bitmap
   SDL_Surface* _ret =
@@ -55,18 +55,73 @@ ScaleSurface (SDL_Surface* Surface, Uint16 Width, Uint16 Height)  // doesnt dele
                           Surface->format->Rmask, Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
 
   // calculate stretching factor for x  and y
-  double _stretch_factor_x = (static_cast<double> (Width)  / static_cast<double> (Surface->w)),
-         _stretch_factor_y = (static_cast<double> (Height) / static_cast<double> (Surface->h));
+  float _stretch_factor_x = (Width  / static_cast<float> (Surface->w)),
+        _stretch_factor_y = (Height / static_cast<float> (Surface->h));
 
   // perform scaling for every pixel of source map
-  for (Sint32 y = 0; y < Surface->h; y++)
-    for (Sint32 x = 0; x < Surface->w; x++)
-      for (Sint32 o_y = 0; o_y < _stretch_factor_y; ++o_y)
-        for (Sint32 o_x = 0; o_x < _stretch_factor_x; ++o_x)
-          putpixel (_ret, static_cast<Sint32> (_stretch_factor_x * x) + o_x,
-                    static_cast<Sint32> (_stretch_factor_y * y) + o_y, getpixel (Surface, x, y));
+  for (int y = 0; y < Surface->h; y++)
+    for (int x = 0; x < Surface->w; x++)
+      for (int o_y = 0; o_y < _stretch_factor_y; ++o_y)
+        for (int o_x = 0; o_x < _stretch_factor_x; ++o_x)
+          putpixel (_ret,
+                    static_cast<int> (_stretch_factor_x * x) + o_x,
+                    static_cast<int> (_stretch_factor_y * y) + o_y,
+                    getpixel (Surface, x, y));
     
-  //return scaled bitmap
+  // return scaled bitmap
+  return _ret;
+}
+
+SDL_Surface*
+LoadCroppedBitmap (const char* filename_in, const struct SDL_Rect& rect_in)
+{
+  // load image to temp file
+  SDL_Surface *temp = IMG_Load (filename_in);
+  if (!temp)
+  {
+    std::cerr << ACE_TEXT_ALWAYS_CHAR ("IMG_Load: ") << IMG_GetError () << std::endl;
+    ACE_OS::exit (1);
+  } // end IF
+
+  // apply alpha channel
+#if defined (SDL1_USE)
+  SDL_Surface* temp2 = SDL_DisplayFormatAlpha (temp);
+#elif defined (SDL2_USE)
+  SDL_Surface* temp2 = SDL_ConvertSurfaceFormat (temp,
+                                                 SDL_PIXELFORMAT_RGBA8888,
+                                                 0);
+#endif // SDL1_USE || SDL2_USE
+  ACE_ASSERT (temp2);
+
+  // scale bitmap
+  SDL_Surface* image = CropSurface (temp2, rect_in);
+  ACE_ASSERT (image);
+
+  // delete junk
+  SDL_FreeSurface (temp);
+  SDL_FreeSurface (temp2);
+
+  // returning pointer to scaled bitmap
+  return image;
+}
+
+SDL_Surface*
+CropSurface (SDL_Surface* surface, const struct SDL_Rect& rect_in)
+{ ACE_ASSERT (rect_in.w <= surface->w && rect_in.h <= surface->h);
+
+  // create bitmap for a cropped bitmap
+  SDL_Surface* _ret =
+    SDL_CreateRGBSurface (surface->flags, rect_in.w, rect_in.h, surface->format->BitsPerPixel,
+                          surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
+
+  // crop pixels out of surface
+  for (int y = 0; y < rect_in.h; y++)
+    for (int x = 0; x < rect_in.w; x++)
+      putpixel (_ret,
+                x, y,
+                getpixel (surface, rect_in.x + x, rect_in.y + y));
+    
+  // return cropped bitmap
   return _ret;
 }
 
@@ -96,7 +151,7 @@ getpixel (SDL_Surface* surface, int x, int y)
       break;
   }
 
-  return 0;       /* shouldn't happen, but avoids warnings */
+  return 0; /* shouldn't happen, but avoids warnings */
 }
 
 void
@@ -111,7 +166,7 @@ putpixel (SDL_Surface* surface, int x, int y, Uint32 pixel)
       *p = pixel;
       break;
     case 2:
-      *(Uint16 *)p = pixel;
+      *(Uint16*)p = pixel;
       break;
     case 3:
       if (SDL_BYTEORDER == SDL_BIG_ENDIAN)

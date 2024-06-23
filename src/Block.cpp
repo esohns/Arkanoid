@@ -5,6 +5,7 @@
 #include "ace/OS.h"
 
 #include "Animation.h"
+#include "defines.h"
 #include "Game.h"
 #include "Effect.h"
 #include "PlayingState.h"
@@ -121,7 +122,7 @@ Block::Collided (int objectID, enum col_dir dir)
     {
       Effect** effs = static_cast<PlayingState*> (g_GamePtr->GetState ())->GetEffects ();
       bool all_effects_are_alive_b = true;
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < DEFAULT_EFFECTS_MAX; i++)
         if (!effs[i]->isAlive ())
         {
           all_effects_are_alive_b = false;
@@ -134,7 +135,7 @@ Block::Collided (int objectID, enum col_dir dir)
         // spawn first found 'dead' effect
         while (true)
         {
-          index_i = ACE_OS::rand () % 3;
+          index_i = ACE_OS::rand () % DEFAULT_EFFECTS_MAX;
           if (!effs[index_i]->isAlive ())
           {
             effs[index_i]->Init (static_cast<int> (x), static_cast<int> (y));
@@ -148,7 +149,7 @@ Block::Collided (int objectID, enum col_dir dir)
       animation->SetFrame (maxhealth - health);
 
     if (g_GamePtr->isSfxOn ())
-      Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
+      Mix_PlayChannel (-1, g_GamePtr->GetSfx (COLLISION), 0);
   }
   else if (objectID == BLOCK)
   {

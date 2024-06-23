@@ -104,5 +104,16 @@ Effect::Collided (int ObjectID, enum col_dir dir)
       ps->GetSecondBall ()->LoseEffect ();
       SetAlive (false);
     }
+    else if (effect_type == LARGE)
+    {
+      PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      ps->GetPlatform ()->MorphPlatform (effect_type);
+      ps->GetBall ()->LoseEffect ();
+      ps->GetSecondBall ()->LoseEffect ();
+      SetAlive (false);
+    } 
+
+    if (g_GamePtr->isSfxOn ())
+      Mix_PlayChannel (-1, g_GamePtr->GetSfx (POWERUP), 0);
   }
 }

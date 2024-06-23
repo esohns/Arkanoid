@@ -13,6 +13,7 @@
 #define g_GamePtr     Game::GetSingletonPtr ()
 
 enum GAME_STATE {MENU, PLAYING};
+enum SFX {COLLISION, LASER, POWERUP};
 
 // forward declarations
 class FpsCounter;
@@ -56,7 +57,7 @@ class Game
   inline void setFPSVisile () { displayFPS = true; }
 
   inline Music* GetMusic () { return music; }
-  inline Mix_Chunk* GetSfx () { return sound; }
+  Mix_Chunk* GetSfx (enum SFX);
   inline SDL_Surface* GetScreen () { return screen; }
 #if defined (SDL2_USE)
   inline SDL_Window* GetWindow () { return window; }
@@ -103,7 +104,9 @@ class Game
 #endif // SDL2_USE
   SDL_Surface* screen;
   Music*       music;
-  Mix_Chunk*   sound;
+  Mix_Chunk*   collision;
+  Mix_Chunk*   laser;
+  Mix_Chunk*   powerup;
   TTF_Font*    font;
 };
 
