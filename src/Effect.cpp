@@ -50,9 +50,12 @@ Effect::Update ()
   if (isAlive ())
   {
     GameObject::Update ();
-    if (animation)
+
+    if (static_cast<int> (y) >= g_Game.GetScreen_H ())
+      SetAlive (false);
+    else if (animation)
       animation->Animate ();
-  }
+  } // end IF
 
   return 0;
 }

@@ -19,6 +19,8 @@ class Gui;
 class PlayingState
  : public State
 {
+  typedef State inherited;
+
  public:
   PlayingState ();
   virtual ~PlayingState ();
@@ -42,12 +44,11 @@ class PlayingState
   void SwitchBalls ();
 
  private:
-  typedef State inherited;
-
   bool                   levelcomplete;
   bool                   changingstate;
 
   std::list<GameObject*> gobjects;
+  std::string            current_level;
   MapLoader*             map_loader;
 
   Ball*                  ball;
@@ -58,8 +59,11 @@ class PlayingState
   Gui*                   gui;
 
   bool                   second_ball_flag;
+  bool                   remove_second_ball;
 
   void SaveHighscores ();
+  unsigned int CurrentLevel ();
+  bool LoadNextMap ();
 };
 
 #endif /* defined(__Arkanoid__PlayingState__) */

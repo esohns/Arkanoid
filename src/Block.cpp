@@ -109,29 +109,46 @@ Block::Render ()
 }
 
 void
-Block::Collided (int objectID, col_dir dir)
+Block::Collided (int objectID, enum col_dir dir)
 {
   if (dir == NO_COLLISION)
     return;
 
   if (objectID == BALL || objectID == PROJECTILE)
   {
-    if (!--health)
+    --health;
+    if (health == 0)
     {
-      Effect** effs = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetEffects ();
-      if (ACE_OS::rand () % 2)
+      Effect** effs = static_cast<PlayingState*> (g_GamePtr->GetState ())->GetEffects ();
+      bool all_effects_are_alive_b = true;
+      for (int i = 0; i < 3; i++)
+        if (!effs[i]->isAlive ())
+        {
+          all_effects_are_alive_b = false;
+          break;
+        } // end IF
+      int index_i;
+      if ((ACE_OS::rand () % 2) &&  // 50% of the time
+          !all_effects_are_alive_b) // spawn an effect ?
       {
-        int index = ACE_OS::rand () % 3;
-        if (!effs[index]->isAlive ())
-          effs[index]->Init (static_cast<int> (x), static_cast<int> (y));
-      }
+        // spawn first found 'dead' effect
+        while (true)
+        {
+          index_i = ACE_OS::rand () % 3;
+          if (!effs[index_i]->isAlive ())
+          {
+            effs[index_i]->Init (static_cast<int> (x), static_cast<int> (y));
+            break;
+          } // end IF
+        } // end WHILE
+      } // end IF
       SetAlive (false);
     }
     else if (animation->IsAutoAnimation ())
       animation->SetFrame (maxhealth - health);
 
     if (g_GamePtr->isSfxOn ())
-      Mix_PlayChannel(-1, g_GamePtr->GetSfx (), 0);
+      Mix_PlayChannel (-1, g_GamePtr->GetSfx (), 0);
   }
   else if (objectID == BLOCK)
   {

@@ -269,16 +269,20 @@ void
 MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_type)
 {
   SDL_GetMouseState (&mouse_pos_x, &mouse_pos_y);
+  bool is_right_mouse_down_b = ((event.type == SDL_MOUSEBUTTONDOWN) &&
+                                (event.button.type == SDL_MOUSEBUTTONDOWN) &&
+                                (event.button.button == SDL_BUTTON_RIGHT));
 
   switch (curMenu)
   {
     case MAIN_MENU:
     {
 #if defined (SDL1_USE)
-      if (keystates[SDLK_ESCAPE])
+      if (keystates[SDLK_ESCAPE] ||
 #elif defined (SDL2_USE)
-      if (keystates[SDL_SCANCODE_ESCAPE])
+      if (keystates[SDL_SCANCODE_ESCAPE] ||
 #endif // SDL1_USE || SDL2_USE
+          is_right_mouse_down_b)
       {
         quit ();
         return;
@@ -288,10 +292,11 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
     case OPTIONS:
     {
 #if defined (SDL1_USE)
-      if (keystates[SDLK_ESCAPE])
+      if (keystates[SDLK_ESCAPE] ||
 #elif defined (SDL2_USE)
-      if (keystates[SDL_SCANCODE_ESCAPE])
+      if (keystates[SDL_SCANCODE_ESCAPE] ||
 #endif // SDL1_USE || SDL2_USE
+          is_right_mouse_down_b)
       {
         GotoMainMenu ();
         return;
@@ -301,10 +306,11 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
     case HIGHSCORES:
     {
 #if defined (SDL1_USE)
-      if (keystates[SDLK_ESCAPE])
+      if (keystates[SDLK_ESCAPE] ||
 #elif defined (SDL2_USE)
-      if (keystates[SDL_SCANCODE_ESCAPE])
+      if (keystates[SDL_SCANCODE_ESCAPE] ||
 #endif // SDL1_USE || SDL2_USE
+          is_right_mouse_down_b)
       {
         GotoMainMenu ();
         return;
@@ -330,9 +336,9 @@ MenuState::HandleEvents (Uint8* keystates, const SDL_Event& event, int control_t
             break;
           default:
             break;
-        }
-      }
-    }
+        } // end SWITCH
+      } // end IF
+    } // end IF
 }
 
 inline

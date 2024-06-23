@@ -59,6 +59,7 @@ set (source_files
      Block.cpp
      ConfigFile.h
      ConfigFile.cpp
+     defines.h
      Effect.h
      Effect.cpp
      FpsCounter.h
@@ -149,6 +150,7 @@ install (FILES
          Ball.h
          Block.h
          ConfigFile.h
+         defines.h
          Effect.h
          FpsCounter.h
          Game.h

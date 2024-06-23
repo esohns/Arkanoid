@@ -3,6 +3,7 @@
 #include "PlayingState.h"
 
 #include <fstream>
+#include <sstream>
 #include <string>
 
 #include "ace/OS.h"
@@ -23,6 +24,7 @@ PlayingState::PlayingState ()
  : inherited ()
  , changingstate (false)
  , gobjects ()
+ , current_level (ACE_TEXT_ALWAYS_CHAR (DEFAULT_MAP_FILE))
  , map_loader (NULL)
  , ball (NULL)
  , second_ball (NULL)
@@ -31,12 +33,13 @@ PlayingState::PlayingState ()
  , projectiles (NULL)
  , gui (NULL)
  , second_ball_flag (false) // setting up flag , second wasnt intialized yet ( pushed on the list )
+ , remove_second_ball (false) // remove second ball from list
 {
   char buffer_a[PATH_MAX];
   ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
-  path_base += RESOURCE_DIRECTORY;
+  path_base += ACE_TEXT_ALWAYS_CHAR (RESOURCE_DIRECTORY);
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   std::string graphics_base = path_base;
   graphics_base += ACE_TEXT_ALWAYS_CHAR (GRAPHICS_DIRECTORY);
@@ -49,21 +52,21 @@ PlayingState::PlayingState ()
   ball = new Ball (file.c_str (), 0, 1, 16, 16, 1, 1);
   second_ball = new Ball (file.c_str (), 0, 1, 16, 16, 1, 1);
 
-  //pushing ball and platform on the list
+  // pushing ball and platform on the list
   gobjects.push_back (platform);
   gobjects.push_back (ball);
 
-  //loading blocks
+  // loading blocks
   file = path_base;
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
   file += ACE_TEXT_ALWAYS_CHAR ("config.cfg");
   map_loader = new MapLoader (file.c_str ());
   file = path_base;
   file += ACE_DIRECTORY_SEPARATOR_STR_A;
-  file += ACE_TEXT_ALWAYS_CHAR (DEFAULT_MAP_FILE);
+  file += current_level;
   gobjects.splice (gobjects.end (), map_loader->LoadMap (file.c_str ()));
 
-  //loading projectiles
+  // loading projectiles
   file = graphics_base;
   file += ACE_TEXT_ALWAYS_CHAR ("effect.png");
   projectiles = new Projectile*[DEFAULT_PROJECTILES_MAX]; // Creating 10 projectile pointers as arbitrary value
@@ -86,7 +89,7 @@ PlayingState::PlayingState ()
   effects[2]->SetEffectType (SECONDBALL);
 
   // we push effects as last elem. beacause they have to be rendered as last objs
-  for (int i=0; i<3; i++)
+  for (int i = 0; i < 3; i++)
     gobjects.push_back (effects[i]);
 
   gui = new Gui ();
@@ -115,8 +118,14 @@ PlayingState::RenderState ()
   {
     DisplayFinishText (3000, levelcomplete ? ACE_TEXT_ALWAYS_CHAR ("Level complete") : ACE_TEXT_ALWAYS_CHAR ("Game over"));
     changingstate = false;
-    ChangeState ();
-  }
+    if (levelcomplete)
+    {
+      if (!LoadNextMap ())
+        ChangeState (); // completed last level...
+    } // end IF
+    else
+      ChangeState ();
+  } // end IF
 }
 
 void
@@ -132,8 +141,26 @@ PlayingState::UpdateState ()
     if ((*iter)->Update () == -1)
       break;  // if an update function returns -1 then we break from loop because we are about to change state
 
+  // remove second ball from rendered objects ?
+  if (remove_second_ball)
+  {
+    remove_second_ball = false;
+    ACE_ASSERT (second_ball_flag);
+    std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+    for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+      if (*iter == static_cast<GameObject*> (second_ball))
+      {
+        iter_2 = iter;
+        break;
+      } // end IF
+    ACE_ASSERT (iter_2 != gobjects.end ());
+    gobjects.erase (iter_2);
+    second_ball_flag = false;
+  } // end IF
+
+  // test: level complete ?
   levelcomplete = true;
-  for (std::list<GameObject*>::iterator iter = gobjects.begin(); iter != gobjects.end(); iter++)
+  for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
   {
     if ((*iter)->GetID () != BLOCK)
       continue;
@@ -142,27 +169,10 @@ PlayingState::UpdateState ()
     {
       levelcomplete = false;
       break;
-    }
-  }
+    } // end IF
+  } // end FOR
   if (levelcomplete)
-  {
     changingstate = true;
-
-    // *TODO*: load next level !!!
-    char buffer_a[BUFSIZ];
-    ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
-    char* username = buffer_a;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    DWORD buffer_size = sizeof (char[BUFSIZ]);
-    if (!GetUserNameA (buffer_a, &buffer_size))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
-                  GetLastError ()));
-#else
-    username = ACE_OS::getenv ("USER");
-#endif // ACE_WIN32 || ACE_WIN64
-    PushScore (username, platform->GetScore ());
-  } // end IF
 }
 
 void
@@ -180,7 +190,11 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
 
   // *TODO*: remove these cheats
 #if defined (_DEBUG)
-  if (event.key.keysym.sym == SDLK_F1)
+  if (event.type != SDL_KEYDOWN)
+    goto continue_;
+  if (event.key.keysym.sym == SDLK_n)
+    LoadNextMap ();
+  else if (event.key.keysym.sym == SDLK_F1)
   {
     platform->MorphPlatform (MAGNET);
     ball->MorphBall (MAGNET);
@@ -201,6 +215,7 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
   }
   else if (event.key.keysym.sym == SDLK_F10)
     platform->AddLife ();
+continue_:
 #endif // _DEBUG
 
   // Movement controls with keyboard
@@ -296,6 +311,108 @@ PlayingState::SaveHighscores ()
   file.close ();
 }
 
+unsigned int
+PlayingState::CurrentLevel ()
+{
+  unsigned int result = 0;
+
+  std::string::size_type position = current_level.find ('.', 0);
+  ACE_ASSERT (position != std::string::npos);
+  std::string level_string = current_level;
+  level_string.erase (position, std::string::npos); // remove trailing ".cfg"
+  level_string.erase (0, 3); // remove leading "map"
+  std::stringstream converter;
+  converter << level_string;
+  converter >> result;
+
+  return result;
+}
+
+bool
+PlayingState::LoadNextMap ()
+{
+  bool result = true;
+
+  // step1: remove second ball from rendered objects
+  std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+  if (second_ball_flag)
+  {
+    for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+      if (*iter == static_cast<GameObject*> (second_ball))
+      {
+        iter_2 = iter;
+        break;
+      } // end IF
+    ACE_ASSERT (iter_2 != gobjects.end ());
+    gobjects.erase (iter_2);
+    second_ball_flag = false;
+  } // end IF
+
+  // step2: throw out all (dead) blocks
+  gobjects.erase (std::remove_if (gobjects.begin (), 
+                                  gobjects.end (),
+                                  [](GameObject* object_in) { return object_in->GetID () == BLOCK; }),
+                  gobjects.end ());
+
+  // step3: load the next set of blocks and insert to just before the first projectile
+  iter_2 = gobjects.end ();
+  for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+    if ((*iter)->GetID () == PROJECTILE)
+    {
+      iter_2 = iter;
+      break;
+    } // end IF
+  ACE_ASSERT (iter_2 != gobjects.end ());
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
+  std::string path_base = buffer_a;
+  path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
+  path_base += ACE_TEXT_ALWAYS_CHAR (RESOURCE_DIRECTORY);
+  std::string file = path_base;
+  file += ACE_DIRECTORY_SEPARATOR_STR_A;
+  // *NOTE*: the maps are enumerated and have the format (map[#level].cfg)
+  unsigned int level_i = CurrentLevel ();
+  if (!level_i)
+    level_i++;
+  level_i++;
+  std::stringstream converter;
+  converter << level_i;
+  std::string level_string;
+  level_string += ACE_TEXT_ALWAYS_CHAR ("map");
+  level_string += converter.str ();
+  level_string += ACE_TEXT_ALWAYS_CHAR (".cfg");
+  file += level_string;
+  map_t blocks_a = map_loader->LoadMap (file.c_str ());
+  if (blocks_a.empty ())
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("failed to MapLoader::LoadMap(\"%s\"), aborting\n"),
+                ACE_TEXT (file.c_str ())));
+    result = false;
+  } // end IF
+  else
+    current_level = level_string;
+  gobjects.splice (iter_2, blocks_a);
+
+  // step4: deactivate any second_ball, projectiles and effects
+  second_ball->SetAlive (false);
+  for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+    if ((*iter)->GetID () == PROJECTILE)
+      (*iter)->SetAlive (false);
+    else if ((*iter)->GetID () == EFFECT)
+      (*iter)->SetAlive (false);
+
+  // step5: deactivate any effects
+  ball->LoseEffect ();
+  second_ball->LoseEffect ();
+  platform->MorphPlatform (-1);
+
+  // step6: reset the ball
+  ball->SetAlive (false);
+
+  return result;
+}
+
 void
 PlayingState::LaunchSecondBall ()
 {
@@ -310,27 +427,28 @@ PlayingState::LaunchSecondBall ()
 
   if (!second_ball_flag)
   {
-    gobjects.push_back (second_ball);
+    // insert after ball
+    std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+    for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+      if (*iter == static_cast<GameObject*> (ball))
+      {
+        iter_2 = iter;
+        break;
+      } // end IF
+    ACE_ASSERT (iter_2 != gobjects.end ());
+    gobjects.insert (iter_2, second_ball);
     second_ball_flag = true;
   }
 }
 
 void
 PlayingState::SwitchBalls ()
-{
-  GameObject* temp_p = second_ball;
-  second_ball = ball;
-  ball = static_cast<Ball*> (temp_p);
+{ ACE_ASSERT (!ball->isAlive () && second_ball->isAlive ());
 
-  //ACE_ASSERT (second_ball_flag);
-  //std::list<GameObject*>::iterator iter_2 = gobjects.end ();
-  //for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
-  //  if (*iter == temp_p)
-  //  {
-  //    iter_2 = iter;
-  //    break;
-  //  } // end IF
-  //ACE_ASSERT (iter_2 != gobjects.end ());
-  //gobjects.erase (iter_2);
-  //second_ball_flag = false;
+  Ball* temp_p = second_ball;
+  second_ball = ball;
+  ball = temp_p;
+
+  // *WARNING*: cannot manipulate gobjects here (it's currently being iterated over !)
+  remove_second_ball = true;
 }

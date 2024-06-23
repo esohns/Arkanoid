@@ -25,6 +25,9 @@ MapLoader::MapLoader (const std::string& filename_in)
  : configfile (NULL)
 {
   configfile = new ConfigFile (filename_in);
+
+  // load bitmaps
+  LoadBitmaps ();
 }
 
 MapLoader::~MapLoader ()
@@ -49,9 +52,6 @@ MapLoader::LoadMap (const std::string& filename_in)
 
   // setting y-coordinate starting position
   float posY = 0.0f;
-
-  // loading bitmaps to a map 
-  LoadBitmaps ();
 
   // iterating through lines of map file
   char c;
@@ -83,7 +83,7 @@ MapLoader::LoadMap (const std::string& filename_in)
 
       //Receiving value from config file map
       value_t value = configfile->GetValue_at_Key (line[i]);
-      Block* g_object = new Block (bitmaps.find(line[i])->second,
+      Block* g_object = new Block (bitmaps.find (line[i])->second,
                                    value.maxFrame,
                                    value.frameDelay,
                                    value.frameWidth,
