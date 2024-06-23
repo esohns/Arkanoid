@@ -46,9 +46,9 @@ Ball::Init ()
   Platform* platform = static_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
   float posX = platform->GetX ();
   float posY = platform->GetY ();
-  int t_dirX = (ACE_OS::rand () % 2 + 1) * 2 - 3; //  picking random direction either left or right
+  int t_dirX = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3; //  picking random direction either left or right
   inherited::Init (posX, posY - (animation->GetFrameHeight () / 2.0f),
-                   static_cast<float> (ACE_OS::rand () % 1 + 3), static_cast<float> (ACE_OS::rand () % 1 + 3),
+                   static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 1 + 3), static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 1 + 3),
                    t_dirX, -1,
                    animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
 }
@@ -154,10 +154,10 @@ Ball::StartFlying ()
     stand_on_platform = false;
 
     // slow down
-    float sign_f = ACE_OS::rand () % 2 ? -1.0f : 1.0f;
-    velX = sign_f * static_cast<float> (ACE_OS::rand () % 1 + 3);
+    float sign_f = ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 ? -1.0f : 1.0f;
+    velX = sign_f * static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 1 + 3);
     dirY = -1;
-    velY = static_cast<float> (ACE_OS::rand () % 1 + 3);
+    velY = static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 1 + 3);
 
     while (IsOnPlatform ())
       Update (); //*NOTE*: make sure that it will 'escape' platform

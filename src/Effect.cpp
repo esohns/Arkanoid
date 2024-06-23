@@ -38,7 +38,7 @@ void
 Effect::Init (int x, int y)
 {
   GameObject::Init (static_cast<float> (x), static_cast<float> (y),
-                    0.0f, static_cast<float> (ACE_OS::rand () % 2 + 1),
+                    0.0f, static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1),
                     0, 1,
                     animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
@@ -91,9 +91,18 @@ Effect::Collided (int ObjectID, enum col_dir dir)
     {
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
-      ps->GetBall ()->LoseEffect ();
-      ps->GetSecondBall ()->LoseEffect ();
+      Ball* ball = ps->GetBall ();
+      ball->LoseEffect ();
+      Ball* second_ball = ps->GetSecondBall ();
+      second_ball->LoseEffect ();
       SetAlive (false);
+
+      // *NOTE*: this ensures that one cannot simply clear the level when
+      //         picking up a gun when no ball(s) is(/are) in play...
+      if (!ball->isAlive ())
+        ball->StartFlying ();
+      if (second_ball->isAlive ())
+        second_ball->StartFlying ();
     }
     else if (effect_type == SECONDBALL)
     {

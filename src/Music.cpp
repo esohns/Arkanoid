@@ -115,7 +115,6 @@ Music::Music (const std::string& baseDirectory_in,
  , music_ (NULL)
  , musicDirectory_ ()
  , musicFiles_ ()
- //, randomSeed_ (0)
  , repeat_ (false)
  , currentIndex_ (-1)
 {
@@ -134,10 +133,6 @@ Music::Music (const std::string& baseDirectory_in,
   musicDirectory_ += ACE_DIRECTORY_SEPARATOR_STR_A;
   musicDirectory_ += ACE_TEXT_ALWAYS_CHAR (SOUNDS_DIRECTORY);
   update (musicDirectory_, type_in);
-
-  //randomSeed_ = static_cast<unsigned int> (ACE_OS::time (NULL));
-  // *NOTE*: already done in main !
-  //ACE_OS::srand (randomSeed_);
 
   next (false);
 }
@@ -221,7 +216,7 @@ Music::next (bool startPlaying_in)
       Mix_FreeMusic (music_); music_ = NULL;
     } // end IF
 
-    currentIndex_ = (ACE_OS::rand () % musicFiles_.size ());
+    currentIndex_ = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % musicFiles_.size ());
     std::string filename = musicDirectory_;
     filename += ACE_DIRECTORY_SEPARATOR_STR_A;
     filename += musicFiles_[currentIndex_];

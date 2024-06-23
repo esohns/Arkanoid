@@ -2,6 +2,8 @@
 
 #include "Animation.h"
 
+#include "ace/Assert.h"
+
 #include "defines.h"
 #include "Game.h"
 #include "scaler.h"
@@ -41,10 +43,11 @@ Animation::Animation (const char* filename_in,
   if (image)
   {
     clip = new struct SDL_Rect ();
+    ACE_ASSERT (clip);
     clip->x = 0;
     clip->y = 0;
-    clip->w = frameWidth;
-    clip->h = frameHeight;
+    clip->w = static_cast<Uint16> (frameWidth);
+    clip->h = static_cast<Uint16> (frameHeight);
   }
 }
 
@@ -67,17 +70,20 @@ Animation::Animation (SDL_Surface* image_in,
  , image (NULL)
  , freeImage (false)
 {
-  frameWidth  = static_cast<int> (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * frameWidth_in);
-  frameHeight = static_cast<int> (g_Game.GetScreen_H () / static_cast<float> (BASE_SCREEN_Y) * frameHeight_in);
+  frameWidth  =
+    static_cast<int> (g_Game.GetScreen_W () / static_cast<float> (BASE_SCREEN_X) * frameWidth_in);
+  frameHeight =
+    static_cast<int> (g_Game.GetScreen_H () / static_cast<float> (BASE_SCREEN_Y) * frameHeight_in);
 
   image = image_in;
   if (image)
   {
     clip = new struct SDL_Rect ();
+    ACE_ASSERT (clip);
     clip->x = 0;
     clip->y = 0;
-    clip->w = frameWidth;
-    clip->h = frameHeight;
+    clip->w = static_cast<Uint16> (frameWidth);
+    clip->h = static_cast<Uint16> (frameHeight);
   }
 }
 
@@ -109,6 +115,6 @@ Animation::Animate ()
 void
 Animation::Draw (float x, float y) const
 {
-  struct SDL_Rect offset = {(Sint16)x, (Sint16)y, 0, 0};
+  struct SDL_Rect offset = {static_cast<Sint16> (x), static_cast<Sint16> (y), 0, 0};
   SDL_BlitSurface (image, clip, g_Game.GetScreen (), &offset);
 }

@@ -20,7 +20,20 @@ if (UNIX)
  endif (SDL2_USE)
 
  add_link_options ("LINKER:--as-needed")
-endif (UNIX)
+elseif (WIN32)
+ if (SDL2_USE)
+  find_path (SDL2_IMAGE_INCLUDE_DIRS NAMES SDL_image.h
+             PATHS "$ENV{LIB_ROOT}/SDL2_image"
+             PATH_SUFFIXES include)
+
+  set (SDL2_IMAGE_LIB "SDL2_image.lib")
+  find_library (SDL2_IMAGE_LIBRARY
+                NAMES ${SDL2_IMAGE_LIB}
+                PATHS "$ENV{LIB_ROOT}/SDL2_image/lib"
+                PATH_SUFFIXES ${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}
+                NO_DEFAULT_PATH)
+ endif (SDL2_USE)
+endif ()
 
 add_executable (${PROJECT_NAME})
 
@@ -133,7 +146,9 @@ if (SDL_SUPPORT)
  elseif (SDL2_USE)
   if (UNIX)
    target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL2_IMAGE_LIBRARIES})
-  endif (UNIX)
+  elseif (WIN32)
+   target_link_libraries (${PROJECT_NAME} PUBLIC ${SDL2_IMAGE_LIBRARY})
+  endif ()
  endif ()
 endif (SDL_SUPPORT)
 
@@ -165,15 +180,82 @@ install (FILES
          scaler.h
          Singleton.h
          State.h
-         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
+         DESTINATION include
          COMPONENT include)
 install (FILES
          ${CMAKE_BINARY_DIR}/${PROJECT_NAME}_config.h
-         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
+         DESTINATION include
          COMPONENT include)
 install (TARGETS ${PROJECT_NAME}
          EXPORT ${PROJECT_NAME}Targets
-         RUNTIME DESTINATION ${INSTALL_BIN_DIR} COMPONENT bin)
+         RUNTIME DESTINATION bin COMPONENT bin)
+if (WIN32)
+ install (FILES
+          ${LIB_ROOT}\\\\ACE_TAO\\\\ACE\\\\lib\\\\ACEd.dll
+          DESTINATION bin COMPONENT bin)
+ if (SDL1_USE)
+  install (FILES
+           ${LIB_ROOT}\\\\SDL\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL.dll
+           ${LIB_ROOT}\\\\SDL_mixer\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL_mixer.dll
+           ${LIB_ROOT}\\\\SDL_ttf\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL_ttf.dll
+           ${LIB_ROOT}\\\\SDL_image\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL_image.dll
+           DESTINATION bin
+           COMPONENT bin)
+ elseif (SDL2_USE)
+  install (FILES
+           ${LIB_ROOT}\\\\SDL2\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL2.dll
+           ${LIB_ROOT}\\\\SDL2_mixer\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL2_mixer.dll
+           ${LIB_ROOT}\\\\SDL2_ttf\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL2_ttf.dll
+           ${LIB_ROOT}\\\\SDL2_image\\\\lib\\\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}\\\\SDL2_image.dll
+           DESTINATION bin
+           COMPONENT bin)
+ endif ()
+endif (WIN32)
+install (FILES
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/config.cfg
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/font.ttf
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/highscores
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/mainfont.ttf
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/map.cfg
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/map2.cfg
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/map3.cfg
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/map4.cfg
+         DESTINATION data
+         COMPONENT data)
+install (FILES
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/AlagaesiaAndEragon.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/collision.wav
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/Destiny.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/Faith.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/FromHere.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/HiddenTears.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/KingOfTheDesert.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/laser.wav
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/LeavingMillie.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/MarchOfTheZargansk.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/Nevermore.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/powerup.wav
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/Syntheticity.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/TheHaunting.mid
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/sounds/Unknown.mid
+         DESTINATION data/sounds
+         COMPONENT data)
+install (FILES
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/background2.jpg
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/ball.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/block2.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/block3.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/block4health.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/effect.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/effect2.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/effect3.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/platformw.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/starsback.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/starsforeforeground.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/starsforeground.png
+         ${CMAKE_CURRENT_SOURCE_DIR}/../data/graphics/starsmidground.png
+         DESTINATION data/graphics
+         COMPONENT data)
 
 ################ launchers ###############
 
@@ -194,7 +276,9 @@ elseif (WIN32)
  file (TO_CMAKE_PATH "${SDL_LIB_DIR}" SDL_LIB_PATH)
  if (SDL1_USE)
   file (TO_CMAKE_PATH "${LIB_ROOT}\\SDL_image\\lib\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}" SDL_IMAGE_LIB_PATH)
- endif (SDL1_USE)
+ elseif (SDL2_USE)
+  file (TO_CMAKE_PATH "${LIB_ROOT}\\SDL2_image\\lib\\${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}" SDL_IMAGE_LIB_PATH)
+ endif ()
  create_target_launcher (${PROJECT_NAME}
                          COMMAND ${COMMAND}
                          ARGS ${ARGS}

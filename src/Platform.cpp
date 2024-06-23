@@ -92,7 +92,7 @@ Platform::Update ()
 #else
     username = ACE_OS::getenv ("USER");
 #endif // ACE_WIN32 || ACE_WIN64
-    playing_state->PushScore (username, GetScore ());
+    playing_state->PushScore (username, score);
   }
 
   return 0;
@@ -149,7 +149,7 @@ Platform::Shoot ()
 void
 Platform::MorphPlatform (int effect_type)
 {
-  static int frame_width_i = 0;
+  static int frame_width_i = 0; // *TODO*: turn this into a member
 
   if (has_effect == LARGE && effect_type != LARGE)
   {

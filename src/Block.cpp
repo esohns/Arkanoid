@@ -129,13 +129,13 @@ Block::Collided (int objectID, enum col_dir dir)
           break;
         } // end IF
       int index_i;
-      if ((ACE_OS::rand () % 2) &&  // 50% of the time
+      if ((ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2) &&  // 50% of the time
           !all_effects_are_alive_b) // spawn an effect ?
       {
         // spawn first found 'dead' effect
         while (true)
         {
-          index_i = ACE_OS::rand () % DEFAULT_EFFECTS_MAX;
+          index_i = ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % DEFAULT_EFFECTS_MAX;
           if (!effs[index_i]->isAlive ())
           {
             effs[index_i]->Init (static_cast<int> (x), static_cast<int> (y));

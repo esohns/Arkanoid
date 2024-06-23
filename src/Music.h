@@ -50,7 +50,6 @@ class Music
    Mix_Music*               music_;
    std::string              musicDirectory_;
    std::vector<std::string> musicFiles_;
-   //unsigned int             randomSeed_;
    bool                     repeat_;
    int                      currentIndex_;
 };

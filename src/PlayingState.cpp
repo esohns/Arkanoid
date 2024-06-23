@@ -213,6 +213,14 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
     platform->MorphPlatform (GUN);
     ball->LoseEffect ();
     second_ball->LoseEffect ();
+
+    // *NOTE*: this ensures that one cannot simply clear the level when
+    //         picking up a gun when no ball(s) is(/are) in play...
+    if (!ball->isAlive ())
+      ball->StartFlying ();
+    if (second_ball->isAlive ())
+      second_ball->StartFlying ();
+
     is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F3)
@@ -280,9 +288,9 @@ continue_:
   {
     int x; // mouse x coordinate position
     SDL_GetMouseState (&x, NULL);
-    if (x - 20 > platform->GetX ())
+    if (x - 10 > platform->GetX ())
       platform->MoveRight ();
-    else if (x + 20 < platform->GetX ())
+    else if (x + 10 < platform->GetX ())
       platform->MoveLeft ();
     else
       platform->StopMoving ();
@@ -435,11 +443,11 @@ PlayingState::LoadNextMap ()
 void
 PlayingState::LaunchSecondBall ()
 {
-  int t_dirX = (ACE_OS::rand () % 2 + 1) * 2 - 3;
-  int t_dirY = (ACE_OS::rand () % 2 + 1) * 2 - 3;
+  int t_dirX = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
+  int t_dirY = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
 
   second_ball->GameObject::Init (ball->GetX (), ball->GetY (),
-                                 static_cast<float> (ACE_OS::rand () % 2 + 3), static_cast<float> (ACE_OS::rand () % 2 + 3),
+                                 static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3), static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3),
                                  t_dirX, t_dirY,
                                  ball->GetBoundX (), ball->GetBoundY ());
   second_ball->SetAlive (true);

@@ -25,9 +25,10 @@ main (int argc_in,
   ACE::init ();
 #endif // ACE_WIN32 || ACE_WIN64
 
-  ACE_OS::srand (SDL_GetTicks ());
+  u_int seed_i = static_cast<u_int> (ACE_OS::time (NULL));
+  ACE_OS::srand (seed_i);
 
-  Game game (argc_in, argv_in);
+  Game game (argc_in, argv_in, seed_i);
   int status = game.Loop ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -22,12 +22,12 @@ class Music;
 class PlayingState;
 class State;
 
-//helper function for conversion
-std::string IntToStr (int n);
-//helper function for Displaying Finish Text
-void DisplayFinishText (unsigned int ms, const char* text);
+// helper function for conversion
+std::string IntToStr (int);
+// helper function for Displaying Finish Text
+void DisplayFinishText (unsigned int, const char*);
 
-//forward declaration for use as callback functions
+// forward declaration for use as callback functions
 void SwitchControl ();
 void SwitchSfx ();
 void SwitchFPSVisibility();
@@ -38,7 +38,7 @@ class Game
  : public Singleton<Game>
 {
  public:
-  Game (int, char*[]);
+  Game (int, char*[], u_int);
   virtual ~Game ();
 
   int Loop ();
@@ -56,6 +56,7 @@ class Game
   inline bool isFPSVisible () { return displayFPS; }
   inline void setFPSVisile () { displayFPS = true; }
 
+  inline u_int* GetRandomSeedPtr () { return &randomSeed; }
   inline Music* GetMusic () { return music; }
   Mix_Chunk* GetSfx (enum SFX);
   inline SDL_Surface* GetScreen () { return screen; }
@@ -79,6 +80,7 @@ class Game
   int initSystems ();
   void closeSystems ();
 
+  u_int        randomSeed;
   bool         running;
   bool         paused;
 
@@ -99,8 +101,8 @@ class Game
 
 #if defined (SDL2_USE)
   SDL_Window*   window;
-  SDL_Renderer* renderer;
-  SDL_Texture*  texture;
+  //SDL_Renderer* renderer;
+  //SDL_Texture*  texture;
 #endif // SDL2_USE
   SDL_Surface* screen;
   Music*       music;

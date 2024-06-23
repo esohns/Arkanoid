@@ -8,8 +8,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "SDL_image.h"
-
 #include "defines.h"
 #include "FpsCounter.h"
 #include "MenuState.h"
@@ -17,8 +15,9 @@
 #include "PlayingState.h"
 #include "State.h"
 
-Game::Game (int argc, char* argv[])
- : running (true)
+Game::Game (int argc, char* argv[], u_int seed_in)
+ : randomSeed (seed_in)
+ , running (true)
  , paused (false)
  , displayFPS (false)
  , sfxOn (true)
@@ -31,8 +30,8 @@ Game::Game (int argc, char* argv[])
  , fps_counter (NULL)
 #if defined (SDL2_USE)
  , window (NULL)
- , renderer (NULL)
- , texture (NULL)
+ //, renderer (NULL)
+ //, texture (NULL)
 #endif // SDL2_USE
  , screen (NULL)
  , music (NULL)
@@ -244,7 +243,8 @@ Game::Loop ()
     HandleEvents ();
     SDL_FillRect (screen, NULL, 0);
 
-    game_state->UpdateState ();
+    if (!paused)
+      game_state->UpdateState ();
     game_state->RenderState ();
 
     if (displayFPS)
@@ -286,15 +286,38 @@ Game::HandleEvents ()
   {
     if (event.type == SDL_QUIT)
       ShutDown ();
+
+    Uint8* keystates =
+#if defined(SDL1_USE)
+      SDL_GetKeyState (NULL);
+#elif defined(SDL2_USE)
+      const_cast<Uint8*> (SDL_GetKeyboardState (NULL));
+#endif // SDL1_USE || SDL2_USE
+
+    if (event.type != SDL_KEYDOWN)
+      goto continue_;
 #if defined (SDL1_USE)
-    Uint8* keystates = SDL_GetKeyState (NULL);
     if (keystates[SDLK_q])
 #elif defined (SDL2_USE)
-    Uint8* keystates = const_cast<Uint8*> (SDL_GetKeyboardState (NULL));
     if (keystates[SDL_SCANCODE_Q])
 #endif // SDL1_USE || SDL2_USE
       ShutDown ();
 
+#if defined (SDL1_USE)
+    if (keystates[SDLK_p])
+#elif defined (SDL2_USE)
+    if (keystates[SDL_SCANCODE_P])
+#endif // SDL1_USE || SDL2_USE
+      paused = !paused;
+
+#if defined (SDL1_USE)
+    if (keystates[SDLK_m])
+#elif defined (SDL2_USE)
+    if (keystates[SDL_SCANCODE_M])
+#endif // SDL1_USE || SDL2_USE
+      music->next (true);
+
+continue_:
     game_state->HandleEvents (keystates, event, control_type);
   } // end WHILE
 }
