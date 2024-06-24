@@ -99,12 +99,22 @@ Ball::Update ()
 
       PlayingState* playing_state_p = static_cast<PlayingState*> (g_GamePtr->GetState ());
       ACE_ASSERT (playing_state_p);
-      Ball* second_ball_p = playing_state_p->GetSecondBall ();
-      if (this == second_ball_p)
-        return 0; // second ball now "dead"
+      std::vector<Ball*>& balls_r = playing_state_p->GetBalls ();
+      if (this != balls_r[0])
+        return 0; // nth ball now "dead"
 
-      if (second_ball_p->isAlive ())
-        playing_state_p->SwitchBalls ();
+      ACE_ASSERT (this == balls_r[0]);
+      // --> was balls[0]
+
+      int n = -1;
+      for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+        if (balls_r[i]->isAlive ())
+        {
+          n = i;
+          break;
+        } // end IF
+      if (n != -1)
+        playing_state_p->SwitchBalls (n);
       else
       {
         Platform* platform = playing_state_p->GetPlatform ();

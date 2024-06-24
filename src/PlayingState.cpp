@@ -26,14 +26,14 @@ PlayingState::PlayingState ()
  , gobjects ()
  , current_level (ACE_TEXT_ALWAYS_CHAR (DEFAULT_MAP_FILE))
  , map_loader (NULL)
- , ball (NULL)
- , second_ball (NULL)
+ , balls ()
  , platform (NULL)
  , effects (NULL)
  , projectiles (NULL)
  , gui (NULL)
- , second_ball_flag (false) // setting up flag , second wasnt intialized yet ( pushed on the list )
- , remove_second_ball (false) // remove second ball from list
+ , n_ball_flag (DEFAULT_BALLS_MAX, false) // setting-up flag, n wasnt intialized yet
+                                          // (i.e. pushed on the list)
+ , remove_n_ball (DEFAULT_BALLS_MAX, false) // remove nth ball from list ?
 {
   char buffer_a[PATH_MAX];
   ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
@@ -49,12 +49,12 @@ PlayingState::PlayingState ()
   platform = new Platform (file.c_str (), 3, 0, 66, 18, 4, 0);
   file = graphics_base;
   file += ACE_TEXT_ALWAYS_CHAR ("ball.png");
-  ball = new Ball (file.c_str (), 0, 1, 16, 16, 1, 1);
-  second_ball = new Ball (file.c_str (), 0, 1, 16, 16, 1, 1);
+  for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+    balls.push_back (new Ball (file.c_str (), 0, 1, 16, 16, 1, 1));
 
   // pushing ball and platform on the list
   gobjects.push_back (platform);
-  gobjects.push_back (ball);
+  gobjects.push_back (balls[0]);
 
   // loading blocks
   file = path_base;
@@ -107,6 +107,8 @@ PlayingState::~PlayingState ()
   delete map_loader;
   for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
     (*iter)->Destroy ();
+  delete [] projectiles;
+  delete [] effects;
   delete gui;
 
   SaveHighscores (); // we save list of highscores to file
@@ -147,22 +149,23 @@ PlayingState::UpdateState ()
     if ((*iter)->Update () == -1)
       break;  // if an update function returns -1 then we break from loop because we are about to change state
 
-  // remove second ball from rendered objects ?
-  if (remove_second_ball)
-  {
-    remove_second_ball = false;
-    ACE_ASSERT (second_ball_flag);
-    std::list<GameObject*>::iterator iter_2 = gobjects.end ();
-    for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
-      if (*iter == static_cast<GameObject*> (second_ball))
-      {
-        iter_2 = iter;
-        break;
-      } // end IF
-    ACE_ASSERT (iter_2 != gobjects.end ());
-    gobjects.erase (iter_2);
-    second_ball_flag = false;
-  } // end IF
+  // remove nth ball from rendered objects ?
+  for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+    if (remove_n_ball[i])
+    {
+      remove_n_ball[i] = false;
+      ACE_ASSERT (n_ball_flag[i]);
+      std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+      for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+        if (*iter == static_cast<GameObject*> (balls[i]))
+        {
+          iter_2 = iter;
+          break;
+        } // end IF
+      ACE_ASSERT (iter_2 != gobjects.end ());
+      gobjects.erase (iter_2);
+      n_ball_flag[i] = false;
+    } // end IF
 
   // test: level complete ?
   levelcomplete = true;
@@ -204,38 +207,42 @@ PlayingState::HandleEvents (Uint8* keystates, const SDL_Event& event, int contro
   else if (event.key.keysym.sym == SDLK_F1)
   {
     platform->MorphPlatform (MAGNET);
-    ball->MorphBall (MAGNET);
-    second_ball->MorphBall (MAGNET);
+    for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+      balls[i]->MorphBall (MAGNET);
+
     is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F2)
   {
     platform->MorphPlatform (GUN);
-    ball->LoseEffect ();
-    second_ball->LoseEffect ();
+    for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+      balls[i]->LoseEffect ();
 
     // *NOTE*: this ensures that one cannot simply clear the level when
     //         picking up a gun when no ball(s) is(/are) in play...
-    if (!ball->isAlive ())
-      ball->StartFlying ();
-    if (second_ball->isAlive ())
-      second_ball->StartFlying ();
+    if (!balls[0]->isAlive ())
+      balls[0]->StartFlying ();
+    for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+      if (balls[i]->isAlive ())
+        balls[i]->StartFlying ();
 
     is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F3)
   {
-    LaunchSecondBall ();
+    LaunchAdditionalBall ();
     platform->MorphPlatform (SECONDBALL);
-    ball->LoseEffect ();
-    second_ball->LoseEffect ();
+    for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+      balls[i]->LoseEffect ();
+
     is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F4)
   {
     platform->MorphPlatform (LARGE);
-    ball->LoseEffect ();
-    second_ball->LoseEffect ();
+    for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+      balls[i]->LoseEffect ();
+ 
     is_powerup_b = true;
   }
   else if (event.key.keysym.sym == SDLK_F10)
@@ -254,13 +261,16 @@ continue_:
     if (keystates[SDL_SCANCODE_SPACE])
 #endif // SDL1_USE || SDL2_USE
     {
-      if (!ball->isAlive () ||
-          ball->IsOnPlatform ())
-        ball->StartFlying ();
-      else if (second_ball->isAlive () &&
-               second_ball->IsOnPlatform ())
-        second_ball->StartFlying ();
-    }
+      if (!balls[0]->isAlive () || balls[0]->IsOnPlatform ())
+        balls[0]->StartFlying ();
+      else
+        for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+          if (balls[i]->isAlive () && balls[i]->IsOnPlatform ())
+          {
+            balls[i]->StartFlying ();
+            break;
+          } // end IF
+    } // end IF
 
 #if defined (SDL1_USE)
     if (keystates[SDLK_LEFT])
@@ -283,7 +293,7 @@ continue_:
     if (keystates[SDL_SCANCODE_X])
 #endif // SDL1_USE || SDL2_USE
       platform->Shoot ();
-  }
+  } // end IF
   else if (control_type == MOUSE)
   {
     int x; // mouse x coordinate position
@@ -301,15 +311,18 @@ continue_:
         platform->Shoot ();
       else if (event.button.button == SDL_BUTTON_MIDDLE)
       {
-        if (!ball->isAlive () ||
-            ball->IsOnPlatform ())
-          ball->StartFlying ();
-        else if (second_ball->isAlive () &&
-                 second_ball->IsOnPlatform ())
-          second_ball->StartFlying ();
-      }
-    }
-  }
+        if (!balls[0]->isAlive () || balls[0]->IsOnPlatform ())
+          balls[0]->StartFlying ();
+        else
+          for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+            if (balls[i]->isAlive () && balls[i]->IsOnPlatform ())
+            {
+              balls[i]->StartFlying ();
+              break;
+            } // end IF
+      } // end ELSE IF
+    } // end IF
+  } // end ELSE IF
 }
 
 void
@@ -360,20 +373,23 @@ PlayingState::LoadNextMap ()
 {
   bool result = true;
 
-  // step1: remove second ball from rendered objects
-  std::list<GameObject*>::iterator iter_2 = gobjects.end ();
-  if (second_ball_flag)
+  // step1: remove additional balls from rendered objects
+  std::list<GameObject*>::iterator iter_2;
+  for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
   {
+    iter_2 = gobjects.end ();
     for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
-      if (*iter == static_cast<GameObject*> (second_ball))
+      if (*iter == static_cast<GameObject*> (balls[i]))
       {
         iter_2 = iter;
         break;
       } // end IF
-    ACE_ASSERT (iter_2 != gobjects.end ());
-    gobjects.erase (iter_2);
-    second_ball_flag = false;
-  } // end IF
+    if (iter_2 != gobjects.end ())
+      gobjects.erase (iter_2);
+
+    n_ball_flag[i] = false;
+    remove_n_ball[i] = false;
+  } // end FOR
 
   // step2: throw out all (dead) blocks
   gobjects.erase (std::remove_if (gobjects.begin (), 
@@ -421,8 +437,9 @@ PlayingState::LoadNextMap ()
     current_level = level_string;
   gobjects.splice (iter_2, blocks_a);
 
-  // step4: deactivate any second_ball, projectiles and effects
-  second_ball->SetAlive (false);
+  // step4: deactivate any nth ball, projectiles and effects
+  for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+    balls[i]->SetAlive (false);
   for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
     if ((*iter)->GetID () == PROJECTILE)
       (*iter)->SetAlive (false);
@@ -430,52 +447,56 @@ PlayingState::LoadNextMap ()
       (*iter)->SetAlive (false);
 
   // step5: deactivate any effects
-  ball->LoseEffect ();
-  second_ball->LoseEffect ();
+  for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+    balls[i]->LoseEffect ();
   platform->MorphPlatform (-1);
 
   // step6: reset the ball
-  ball->SetAlive (false);
+  balls[0]->SetAlive (false);
 
   return result;
 }
 
 void
-PlayingState::LaunchSecondBall ()
+PlayingState::LaunchAdditionalBall ()
 {
-  int t_dirX = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
-  int t_dirY = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
+  for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+    if (!balls[i]->isAlive ())
+    {
+      int t_dirX = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
+      int t_dirY = (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 1) * 2 - 3;
+      balls[i]->GameObject::Init (balls[0]->GetX (), balls[0]->GetY (),
+                                  static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3), static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3),
+                                  t_dirX, t_dirY,
+                                  balls[0]->GetBoundX (), balls[0]->GetBoundY ());
+      balls[i]->SetAlive (true);
 
-  second_ball->GameObject::Init (ball->GetX (), ball->GetY (),
-                                 static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3), static_cast<float> (ACE_OS::rand_r (g_GamePtr->GetRandomSeedPtr ()) % 2 + 3),
-                                 t_dirX, t_dirY,
-                                 ball->GetBoundX (), ball->GetBoundY ());
-  second_ball->SetAlive (true);
-
-  if (!second_ball_flag)
-  {
-    // insert after ball
-    std::list<GameObject*>::iterator iter_2 = gobjects.end ();
-    for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
-      if (*iter == static_cast<GameObject*> (ball))
+      if (!n_ball_flag[i]) // already in gobjects ?
       {
-        iter_2 = iter;
-        break;
+        // insert after balls[0]
+        std::list<GameObject*>::iterator iter_2 = gobjects.end ();
+        for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
+          if (*iter == static_cast<GameObject*> (balls[0]))
+          {
+            iter_2 = iter;
+            break;
+          } // end IF
+        ACE_ASSERT (iter_2 != gobjects.end ());
+        gobjects.insert (iter_2, balls[i]);
+        n_ball_flag[i] = true;
       } // end IF
-    ACE_ASSERT (iter_2 != gobjects.end ());
-    gobjects.insert (iter_2, second_ball);
-    second_ball_flag = true;
-  }
+      break;
+    } // end IF
 }
 
 void
-PlayingState::SwitchBalls ()
-{ ACE_ASSERT (!ball->isAlive () && second_ball->isAlive ());
+PlayingState::SwitchBalls (int n)
+{ ACE_ASSERT (!balls[0]->isAlive () && balls[n]->isAlive ());
 
-  Ball* temp_p = second_ball;
-  second_ball = ball;
-  ball = temp_p;
+  Ball* temp_p = balls[n];
+  balls[n] = balls[0];
+  balls[0] = temp_p;
 
   // *WARNING*: cannot manipulate gobjects here (it's currently being iterated over !)
-  remove_second_ball = true;
+  remove_n_ball[n] = true;
 }

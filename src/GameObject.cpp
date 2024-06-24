@@ -70,6 +70,8 @@ GameObject::Destroy ()
   //Destroying GameObject
   if (animation)
     delete animation; // deleting Animation if it existed
+
+  delete this;
 }
 
 void

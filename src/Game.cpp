@@ -40,9 +40,6 @@ Game::Game (int argc, char* argv[], u_int seed_in)
  , powerup (NULL)
  , font (NULL)
 {
-  char buffer_a[PATH_MAX];
-  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
-
   if (initSystems () == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -50,6 +47,8 @@ Game::Game (int argc, char* argv[], u_int seed_in)
     ACE_OS::exit (1);
   } // end IF
 
+  char buffer_a[PATH_MAX];
+  ACE_OS::getcwd (buffer_a, sizeof (char[PATH_MAX]));
   std::string path_base = buffer_a;
   path_base += ACE_DIRECTORY_SEPARATOR_STR_A;
   path_base += RESOURCE_DIRECTORY;
@@ -204,7 +203,7 @@ Game::initSystems ()
                 mixer_flags_i, result,
                 ACE_TEXT (Mix_GetError ())));
   // debug info
-  const int total = Mix_GetNumChunkDecoders ();
+  int total = Mix_GetNumChunkDecoders ();
   for (int i = 0; i < total; i++)
     std::cerr << ACE_TEXT_ALWAYS_CHAR ("Supported chunk decoder: ") <<  Mix_GetChunkDecoder (i) << std::endl;
 
@@ -380,21 +379,21 @@ SwitchControl ()
     default:
      break;
   } // end SWITCH
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (CONTROL);
+  static_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (CONTROL);
 }
 
 void
 SwitchSfx ()
 {
   g_GamePtr->sfxOn = !g_GamePtr->sfxOn;
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SOUNDON);
+  static_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SOUNDON);
 }
 
 void
 SwitchFPSVisibility ()
 {
   g_GamePtr->displayFPS = !g_GamePtr->displayFPS;
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SHOWFPS);
+  static_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (SHOWFPS);
 }
 
 void

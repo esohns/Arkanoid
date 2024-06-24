@@ -31,6 +31,8 @@
 #define DEFAULT_CONTROL_TYPE      KEYBOARD
 #define DEFAULT_MAP_FILE          "map.cfg"
 
+#define DEFAULT_BALLS_MAX         10
+
 #define DEFAULT_EFFECTS_MAX       4
 
 #define DEFAULT_PROJECTILES_MAX   10

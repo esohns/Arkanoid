@@ -2,6 +2,7 @@
 #define __Arkanoid__PlayingState__
 
 #include <list>
+#include <vector>
 
 #include "SDL.h"
 
@@ -37,11 +38,10 @@ class PlayingState
   inline Effect** GetEffects () { return effects; }
   inline Projectile** GetProjectiles () { return projectiles; }
   inline Platform* GetPlatform () { return platform; }
-  inline Ball* GetBall () { return ball; }
-  inline Ball* GetSecondBall () { return second_ball; }
+  inline std::vector<Ball*>& GetBalls () { return balls; }
 
-  void LaunchSecondBall ();
-  void SwitchBalls ();
+  void LaunchAdditionalBall ();
+  void SwitchBalls (int);
 
  private:
   bool                   levelcomplete;
@@ -51,15 +51,14 @@ class PlayingState
   std::string            current_level;
   MapLoader*             map_loader;
 
-  Ball*                  ball;
-  Ball*                  second_ball;
+  std::vector<Ball*>     balls;
   Platform*              platform;
   Effect**               effects;
   Projectile**           projectiles;
   Gui*                   gui;
 
-  bool                   second_ball_flag;
-  bool                   remove_second_ball;
+  std::vector<bool>      n_ball_flag;
+  std::vector<bool>      remove_n_ball;
 
   void SaveHighscores ();
   unsigned int CurrentLevel ();

@@ -6,6 +6,7 @@
 
 #include "Animation.h"
 #include "Ball.h"
+#include "defines.h"
 #include "Game.h"
 #include "Platform.h"
 #include "PlayingState.h"
@@ -83,42 +84,45 @@ Effect::Collided (int ObjectID, enum col_dir dir)
     {
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
-      ps->GetBall ()->MorphBall (effect_type);
-      ps->GetSecondBall ()->MorphBall (effect_type);
+      std::vector<Ball*>& balls_r = ps->GetBalls ();
+      for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+        balls_r[i]->MorphBall (effect_type);
       SetAlive (false);
     }
     else if (effect_type == GUN)
     {
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
-      Ball* ball = ps->GetBall ();
-      ball->LoseEffect ();
-      Ball* second_ball = ps->GetSecondBall ();
-      second_ball->LoseEffect ();
+      std::vector<Ball*>& balls_r = ps->GetBalls ();
+      for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+        balls_r[i]->LoseEffect ();
       SetAlive (false);
 
       // *NOTE*: this ensures that one cannot simply clear the level when
       //         picking up a gun when no ball(s) is(/are) in play...
-      if (!ball->isAlive ())
-        ball->StartFlying ();
-      if (second_ball->isAlive ())
-        second_ball->StartFlying ();
+      if (!balls_r[0]->isAlive ())
+        balls_r[0]->StartFlying ();
+      for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+        if (balls_r[i]->isAlive ())
+          balls_r[i]->StartFlying ();
     }
     else if (effect_type == SECONDBALL)
     {
-      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->LaunchSecondBall ();
+      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->LaunchAdditionalBall ();
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
-      ps->GetBall ()->LoseEffect ();
-      ps->GetSecondBall ()->LoseEffect ();
+      std::vector<Ball*>& balls_r = ps->GetBalls ();
+      for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+        balls_r[i]->LoseEffect ();
       SetAlive (false);
     }
     else if (effect_type == LARGE)
     {
       PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
-      ps->GetBall ()->LoseEffect ();
-      ps->GetSecondBall ()->LoseEffect ();
+      std::vector<Ball*>& balls_r = ps->GetBalls ();
+      for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
+        balls_r[i]->LoseEffect ();
       SetAlive (false);
     } 
 
