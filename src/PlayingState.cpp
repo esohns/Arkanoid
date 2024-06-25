@@ -99,7 +99,7 @@ PlayingState::PlayingState ()
     gobjects.push_back (effects[i]);
 
   gui = new Gui ();
-  gui->Init (g_GamePtr->GetScreen_W () - 135, g_GamePtr->GetScreen_H () - 35);
+  gui->Init (g_GamePtr->GetScreen_W () - 135, g_GamePtr->GetScreen_H () - 52);
 }
 
 PlayingState::~PlayingState ()

@@ -14,7 +14,7 @@ void
 SwitchMusic ()
 {
   g_GamePtr->GetMusic ()->musicOn_ = !g_GamePtr->GetMusic ()->musicOn_;
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (MUSICON);
+  static_cast<MenuState*> (g_GamePtr->GetState ())->UpdateInfo (MUSICON);
 
   if (g_GamePtr->GetMusic ()->isMusicOn ())
   {

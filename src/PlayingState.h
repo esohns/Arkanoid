@@ -44,6 +44,8 @@ class PlayingState
   void RemoveAdditionalBall (Ball*);
   void SwitchBalls (int);
 
+  unsigned int CurrentLevel ();
+
  private:
   bool                   levelcomplete;
   bool                   changingstate;
@@ -62,7 +64,6 @@ class PlayingState
   std::vector<bool>      remove_n_ball;
 
   void SaveHighscores ();
-  unsigned int CurrentLevel ();
   bool LoadNextMap ();
 };
 

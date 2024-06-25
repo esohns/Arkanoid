@@ -78,6 +78,6 @@ Projectile::Collided (int ObjectID, col_dir dir)
   if (ObjectID == BLOCK)
   {
     SetAlive (false);
-    dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
+    //static_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ()->AddPoint ();
   }
 }

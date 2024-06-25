@@ -77,7 +77,7 @@ Platform::Update ()
 
   if (!lives)
   {
-    PlayingState* playing_state = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+    PlayingState* playing_state = static_cast<PlayingState*> (g_GamePtr->GetState ());
     playing_state->PushScore (g_GamePtr->GetUserName_ (), score);
     playing_state->SetChangingStateFlag (true); // *TODO*: show highscores next
   } // end IF
@@ -111,7 +111,8 @@ Platform::Shoot ()
 {
   if (has_effect == GUN)
   {
-    Projectile** projectiles_temp = dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->GetProjectiles ();
+    Projectile** projectiles_temp =
+      static_cast<PlayingState*> (g_GamePtr->GetState ())->GetProjectiles ();
     for (int i = 0; i < DEFAULT_PROJECTILES_MAX; i++)
       if (!projectiles_temp[i]->isAlive ())
       {

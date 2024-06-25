@@ -82,7 +82,7 @@ Effect::Collided (int ObjectID, enum col_dir dir)
   {
     if (effect_type == MAGNET)
     {
-      PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      PlayingState* ps = static_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
       std::vector<Ball*>& balls_r = ps->GetBalls ();
       for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
@@ -91,7 +91,7 @@ Effect::Collided (int ObjectID, enum col_dir dir)
     }
     else if (effect_type == GUN)
     {
-      PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      PlayingState* ps = static_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
       std::vector<Ball*>& balls_r = ps->GetBalls ();
       for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
@@ -108,8 +108,8 @@ Effect::Collided (int ObjectID, enum col_dir dir)
     }
     else if (effect_type == SECONDBALL)
     {
-      dynamic_cast<PlayingState*> (g_GamePtr->GetState ())->LaunchAdditionalBall ();
-      PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      PlayingState* ps = static_cast<PlayingState*> (g_GamePtr->GetState ());
+      ps->LaunchAdditionalBall ();
       ps->GetPlatform ()->MorphPlatform (effect_type);
       std::vector<Ball*>& balls_r = ps->GetBalls ();
       for (int i = 0; i < DEFAULT_BALLS_MAX; i++)
@@ -118,7 +118,7 @@ Effect::Collided (int ObjectID, enum col_dir dir)
     }
     else if (effect_type == LARGE)
     {
-      PlayingState* ps = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
+      PlayingState* ps = static_cast<PlayingState*> (g_GamePtr->GetState ());
       ps->GetPlatform ()->MorphPlatform (effect_type);
       std::vector<Ball*>& balls_r = ps->GetBalls ();
       for (int i = 0; i < DEFAULT_BALLS_MAX; i++)

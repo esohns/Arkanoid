@@ -387,17 +387,17 @@ MenuState::RunCommand (std::list<T>& menu_list)
 void
 GotoOptions ()
 {
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = OPTIONS;
+  static_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = OPTIONS;
 }
 
 void
 GotoHighscores ()
 {
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = HIGHSCORES;
+  static_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = HIGHSCORES;
 }
 
 void
 GotoMainMenu ()
 {
-  dynamic_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = MAIN_MENU;
+  static_cast<MenuState*> (g_GamePtr->GetState ())->curMenu = MAIN_MENU;
 }

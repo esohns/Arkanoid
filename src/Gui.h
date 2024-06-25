@@ -15,17 +15,19 @@ class Gui
   void Update ();
 
  private:
-  SDL_Color color;
+  struct SDL_Color color;
 
-  int x;
-  int y;
+  int              x;
+  int              y;
 
-  int score;
-  int lives;
+  int              level;
+  int              score;
+  int              lives;
 
-  SDL_Surface* score_msg;
-  SDL_Surface* lives_msg;
-  TTF_Font* font;
+  SDL_Surface*     level_msg;
+  SDL_Surface*     score_msg;
+  SDL_Surface*     lives_msg;
+  TTF_Font*        font;
 };
 
 #endif /* defined(__Arkanoid__Gui__) */

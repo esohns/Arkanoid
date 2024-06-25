@@ -8,6 +8,7 @@
 #include "defines.h"
 #include "Game.h"
 #include "Effect.h"
+#include "Platform.h"
 #include "PlayingState.h"
 
 Block::Block (const char* filename,
@@ -64,7 +65,7 @@ Block::Init (float x,
              float y,
              int speed,
              int dirX,
-             int health)
+             int health_in)
 {
   // Initializing block
   GameObject::Init (x, y,
@@ -73,8 +74,8 @@ Block::Init (float x,
                     animation->GetFrameWidth () / 2.0f, animation->GetFrameHeight () / 2.0f);
   SetAlive (true);
 
-  Block::health = health;
-  Block::maxhealth = health;
+  health = health_in;
+  maxhealth = health_in;
 }
 
 int
@@ -84,11 +85,11 @@ Block::Update ()
   {
     GameObject::Update ();
 
-    //Performing boundry checking
+    // performing boundary checking
     if (x > g_Game.GetScreen_W () - boundX || x < boundX)
       dirX *= -1;
 
-    //Updating of animation exists
+    // updating of animation exists
     if (animation)
       animation->Animate ();
   }
@@ -120,7 +121,8 @@ Block::Collided (int objectID, enum col_dir dir)
     --health;
     if (health == 0)
     {
-      Effect** effs = static_cast<PlayingState*> (g_GamePtr->GetState ())->GetEffects ();
+      PlayingState* playing_state_p = static_cast<PlayingState*> (g_GamePtr->GetState ());
+      Effect** effs = playing_state_p->GetEffects ();
       bool all_effects_are_alive_b = true;
       for (int i = 0; i < DEFAULT_EFFECTS_MAX; i++)
         if (!effs[i]->isAlive ())
@@ -143,6 +145,10 @@ Block::Collided (int objectID, enum col_dir dir)
           } // end IF
         } // end WHILE
       } // end IF
+
+      Platform* platform = playing_state_p->GetPlatform ();
+      platform->AddPoint ();
+
       SetAlive (false);
     }
     else if (animation->IsAutoAnimation ())
