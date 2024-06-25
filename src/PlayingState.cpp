@@ -111,7 +111,7 @@ PlayingState::~PlayingState ()
   delete [] effects;
   delete gui;
 
-  SaveHighscores (); // we save list of highscores to file
+  SaveHighscores (); // save list of highscores to file
 }
 
 void
@@ -129,7 +129,10 @@ PlayingState::RenderState ()
     if (levelcomplete)
     {
       if (!LoadNextMap ())
-        ChangeState (); // completed last level...
+      {
+        PushScore (g_GamePtr->GetUserName_ (), platform->GetScore ());
+        ChangeState (); // *TODO*: completed last level...
+      } // end IF
     } // end IF
     else
       ChangeState ();
@@ -154,6 +157,7 @@ PlayingState::UpdateState ()
     if (remove_n_ball[i])
     {
       remove_n_ball[i] = false;
+
       ACE_ASSERT (n_ball_flag[i]);
       std::list<GameObject*>::iterator iter_2 = gobjects.end ();
       for (std::list<GameObject*>::iterator iter = gobjects.begin (); iter != gobjects.end (); iter++)
@@ -485,8 +489,24 @@ PlayingState::LaunchAdditionalBall ()
         gobjects.insert (iter_2, balls[i]);
         n_ball_flag[i] = true;
       } // end IF
+      break; // launch a single ball only
+    } // end IF
+}
+
+void
+PlayingState::RemoveAdditionalBall (Ball* ball_in)
+{
+  int n = -1;
+  for (int i = 1; i < DEFAULT_BALLS_MAX; i++)
+    if (balls[i] == ball_in)
+    {
+      n = i;
       break;
     } // end IF
+  ACE_ASSERT (n != -1);
+
+  // *WARNING*: cannot manipulate gobjects here (it's currently being iterated over !)
+  remove_n_ball[n] = true;
 }
 
 void

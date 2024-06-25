@@ -217,13 +217,13 @@ Game::closeSystems ()
     SDL_FreeSurface (screen);
   if (font)
     TTF_CloseFont (font);
+  Mix_CloseAudio ();
   if (collision)
     Mix_FreeChunk (collision);
   if (laser)
     Mix_FreeChunk (laser);
   if (powerup)
     Mix_FreeChunk (powerup);
-  Mix_CloseAudio ();
   Mix_Quit ();
   TTF_Quit ();
   SDL_Quit ();
@@ -249,7 +249,9 @@ Game::Loop ()
     if (displayFPS)
     {
       char buffer_a[10] = {0};
-      ACE_OS::sprintf (buffer_a, ACE_TEXT_ALWAYS_CHAR ("%d fps"), fps_counter->getFPS ());
+      ACE_OS::sprintf (buffer_a,
+                       ACE_TEXT_ALWAYS_CHAR ("%d fps"),
+                       fps_counter->getFPS ());
 #if defined (SDL1_USE)
       SDL_WM_SetCaption (buffer_a, NULL);
 #elif defined (SDL2_USE)
@@ -319,6 +321,28 @@ Game::HandleEvents ()
 continue_:
     game_state->HandleEvents (keystates, event, control_type);
   } // end WHILE
+}
+
+std::string
+Game::GetUserName_ ()
+{
+  std::string result;
+
+  char buffer_a[BUFSIZ];
+  ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
+  char* username = buffer_a;
+#if defined(ACE_WIN32) || defined(ACE_WIN64)
+  DWORD buffer_size = sizeof (char[BUFSIZ]);
+  if (!GetUserNameA (buffer_a, &buffer_size))
+    ACE_DEBUG ((LM_ERROR, ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
+                GetLastError ()));
+#else
+  username = ACE_OS::getenv ("USER");
+#endif // ACE_WIN32 || ACE_WIN64
+
+  result = username;
+  
+  return result;
 }
 
 Mix_Chunk*

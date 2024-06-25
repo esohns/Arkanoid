@@ -41,6 +41,7 @@ class PlayingState
   inline std::vector<Ball*>& GetBalls () { return balls; }
 
   void LaunchAdditionalBall ();
+  void RemoveAdditionalBall (Ball*);
   void SwitchBalls (int);
 
  private:

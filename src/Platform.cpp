@@ -73,27 +73,14 @@ Platform::Update ()
     // updating if animation exists
     if (animation)
       animation->Animate ();
-  }
+  } // end IF
 
   if (!lives)
   {
     PlayingState* playing_state = dynamic_cast<PlayingState*> (g_GamePtr->GetState ());
-    playing_state->SetChangingStateFlag (true);
-
-    char buffer_a[BUFSIZ];
-    ACE_OS::memset (&buffer_a, 0, sizeof (char[BUFSIZ]));
-    char* username = buffer_a;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    DWORD buffer_size = sizeof (char[BUFSIZ]);
-    if (!GetUserNameA (buffer_a, &buffer_size))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to GetUserName: %d, continuing\n"),
-                  GetLastError ()));
-#else
-    username = ACE_OS::getenv ("USER");
-#endif // ACE_WIN32 || ACE_WIN64
-    playing_state->PushScore (username, score);
-  }
+    playing_state->PushScore (g_GamePtr->GetUserName_ (), score);
+    playing_state->SetChangingStateFlag (true); // *TODO*: show highscores next
+  } // end IF
 
   return 0;
 }
@@ -117,13 +104,6 @@ Platform::Collided (int objectID, enum col_dir dir)
   if (dir == NO_COLLISION)
     return;
 
-  //if (objectID == BALL)
-  //{
-    //if (!(has_effect == MAGNET)) // if platform is under effect of Magnet then we dont want to add points constantly
-    //{
-      //AddPoint (); // *NOTE*: point awards are handled by individual ball(s)
-    //}
-  //}
 }
 
 void

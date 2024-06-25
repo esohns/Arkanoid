@@ -78,7 +78,7 @@ Ball::Update ()
     Platform* platform = static_cast<PlayingState*> (g_GamePtr->GetState ())->GetPlatform ();
     x = platform->GetX ();
     y = platform->GetY () - 21.0f;
-  }
+  } // end IF
   else
   {
     inherited::Update ();
@@ -86,12 +86,12 @@ Ball::Update ()
     if (launching && !IsOnPlatform ())
       launching = false;
 
-    // we do a boundary checking
-    if ((static_cast<int> (x) >= (g_Game.GetScreen_W () - static_cast<int> (boundX))) || (x <= boundX))
+    // check boundaries
+    if ((static_cast<int> (x) >= (g_Game.GetScreen_W () - static_cast<int> (boundX))) ||
+        (x <= boundX))
       dirX *= -1;
-    else if (y <= boundY)
+    if (y <= boundY)
       dirY *= -1;
-    
     if (static_cast<int> (y) >= g_Game.GetScreen_H ())
     {
       SetAlive (false);
@@ -101,7 +101,10 @@ Ball::Update ()
       ACE_ASSERT (playing_state_p);
       std::vector<Ball*>& balls_r = playing_state_p->GetBalls ();
       if (this != balls_r[0])
+      {
+        playing_state_p->RemoveAdditionalBall (this);
         return 0; // nth ball now "dead"
+      } // end IF
 
       ACE_ASSERT (this == balls_r[0]);
       // --> was balls[0]
@@ -120,10 +123,10 @@ Ball::Update ()
         Platform* platform = playing_state_p->GetPlatform ();
         platform->LoseLife ();
         platform->MorphPlatform (-1); // calling platform to lose it's effect because (last) ball has just died
-      }
-    }
-  }
-  
+      } // end ELSE
+    } // end IF
+  } // end ELSE
+
   // we also update its animation if it exists
   if (animation)
     animation->Animate ();

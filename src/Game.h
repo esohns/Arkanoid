@@ -56,6 +56,7 @@ class Game
   inline bool isFPSVisible () { return displayFPS; }
   inline void setFPSVisile () { displayFPS = true; }
 
+  std::string GetUserName_ ();
   inline u_int* GetRandomSeedPtr () { return &randomSeed; }
   inline Music* GetMusic () { return music; }
   Mix_Chunk* GetSfx (enum SFX);
