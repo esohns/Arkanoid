@@ -100,7 +100,7 @@ endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
  add_compile_options (-ansi)
- add_compile_options (-std=c++17)
+# add_compile_options (-std=c++17)
  add_compile_options (-Wall)
  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g")
  add_definitions (-D_GNU_SOURCE)
@@ -161,11 +161,7 @@ configure_file (${PROJECT_NAME}ConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/${P
 
 set (PACKAGE ${PROJECT_NAME})
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h @ONLY)
-#add_custom_target (${PROJECT_NAME}_config)
-#set_target_properties (${PROJECT_NAME}_config PROPERTIES
-#                       PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h")
 add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 ################################################################################
 
@@ -175,7 +171,7 @@ elseif (WIN32)
  include (InstallRequiredSystemLibraries)
 endif ()
 
-# Install the ardroneConfig.cmake and ardroneConfigVersion.cmake
+# Install the ArkanoidConfig.cmake and ArkanoidConfigVersion.cmake
 install (FILES
          "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
          "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
@@ -184,18 +180,11 @@ install (FILES
 install (EXPORT ${PROJECT_NAME}Targets
          DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h"
-         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
-         COMPONENT dev)
-
 ################################################################################
 
 # enable (unit/integration) tests
 #include (CTest)
 enable_testing ()
-
-#add_subdirectory (test_u)
-#add_subdirectory (test_i)
 
 ################################################################################
 
@@ -215,68 +204,8 @@ set (CPACK_PACKAGE_CONTACT "erik.sohns@posteo.de")
 # *NOTE*: this does not work on Win32 using the NSIS installer
 set (CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION OFF)
 
-if (UNIX)
-# set (CPACK_GENERATOR "DEB")
-# set (CPACK_DEBIAN_PACKAGE_NAME )
-# set (CPACK_DEBIAN_PACKAGE_VERSION)
-# set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
-# set (CPACK_DEBIAN_PACKAGE_MAINTAINER)
-# set (CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-# set (CPACK_DEBIAN_PACKAGE_SECTION)
-# set (CPACK_DEBIAN_COMPRESSION_TYPE)
-# set (CPACK_DEBIAN_PACKAGE_PRIORITY)
-# set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
-# set (CPACK_DEBIAN_PACKAGE_DEBUG)
-# set (CPACK_DEBIAN_PACKAGE_PREDEPENDS)
-# set (CPACK_DEBIAN_PACKAGE_ENHANCES)
-# set (CPACK_DEBIAN_PACKAGE_BREAKS)
-# set (CPACK_DEBIAN_PACKAGE_CONFLICTS)
-# set (CPACK_DEBIAN_PACKAGE_PROVIDES)
-# set (CPACK_DEBIAN_PACKAGE_REPLACES)
-# set (CPACK_DEBIAN_PACKAGE_RECOMMENDS)
-# set (CPACK_DEBIAN_PACKAGE_SUGGESTS)
-# set (CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA)
-elseif (WIN32)
-# set (CPACK_GENERATOR "NSIS")
- #set (CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
- #set (CPACK_PACKAGE_INSTALL_DIRECTORY)
- #set (CPACK_NSIS_MUI_ICON ${CMAKE_CURRENT_SOURCE_DIR}/data/graphics/arkanoid.ico)
- #set (CPACK_NSIS_MUI_UNIICON)
- #set (CPACK_NSIS_INSTALLER_MUI_ICON_CODE)
- #set (CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS)
- #set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS)
- #set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS)
- #set (CPACK_NSIS_COMPRESSOR /SOLID zip)
-# set (CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL OFF)
- #set (CPACK_NSIS_MODIFY_PATH)
- #set (CPACK_NSIS_DISPLAY_NAME ${PROJECT_NAME})
- #set (CPACK_NSIS_PACKAGE_NAME ${PROJECT_NAME})
- #set (CPACK_NSIS_INSTALLED_ICON_NAME )
- #set (CPACK_NSIS_HELP_LINK https://github.com/esohns/Arkanoid)
- #set (CPACK_NSIS_URL_INFO_ABOUT https://github.com/esohns/Arkanoid)
- #set (CPACK_NSIS_CONTACT erik.sohns@posteo.de)
- #set (CPACK_NSIS_CREATE_ICONS_EXTRA)
- #set (CPACK_NSIS_DELETE_ICONS_EXTRA)
- #set (CPACK_NSIS_EXECUTABLES_DIRECTORY)
- #set (CPACK_NSIS_MUI_FINISHPAGE_RUN)
- #set (CPACK_NSIS_MENU_LINKS)
-endif ()
-
 #set (CPACK_COMPONENTS_ALL bin config data)
 
 include (CPack)
 
 ################################################################################
-
-#if (WIN32)
-# add_custom_target (installer
-#                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Arkanoid.exe)
-
- #set (NSIS_PROJECT_FILE "${PROJECT_NAME}.nsi")
-# add_custom_command (TARGET installer
-#                     POST_BUILD
-#                     COMMAND make_installer.bat ${CMAKE_BUILD_TYPE} ${NSIS_PROJECT_FILE}
-#                     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/scripts"
-#                     COMMENT "making installer..."
-#                     VERBATIM)
-#endif (WIN32)
