@@ -191,7 +191,7 @@ install (TARGETS ${PROJECT_NAME}
          RUNTIME DESTINATION bin COMPONENT bin)
 if (WIN32)
  install (FILES
-          ${LIB_ROOT}\\\\ACE_TAO\\\\ACE\\\\lib\\\\ACEd.dll
+          ${LIB_ROOT}\\\\ACE_TAO\\\\ACE\\\\lib\\\\ACE.dll
           DESTINATION bin COMPONENT bin)
  if (SDL1_USE)
   install (FILES
