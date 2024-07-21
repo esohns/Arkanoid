@@ -2,7 +2,7 @@
 
 #include "Ball.h"
 
-#include "ace/OS.h"
+#include "ace/OS_NS_stdlib.h"
 
 #include "Animation.h"
 #include "defines.h"
@@ -28,7 +28,7 @@ Ball::Ball (const char* filename,
  , stand_on_platform (false)
  , launching (false)
 {
-  //setting ID and calling superclass constructor
+  // setting ID and calling superclass constructor
   SetID (BALL);
 }
 
@@ -205,7 +205,9 @@ Ball::Collided (int ObjectID, enum col_dir dir)
         dirX = 1;
         dirY = -1;
         break;
-    }
+      default:
+        break;
+    } // end SWITCH
 
     if (has_effect == MAGNET && stand_on_platform == false)
     {
@@ -271,6 +273,8 @@ Ball::Collided (int ObjectID, enum col_dir dir)
         dirX = 1;
         dirY = 1;
         break;
-    }
-  }
+      default:
+        break;
+    } // end SWITCH
+  } // end ELSE IF
 }

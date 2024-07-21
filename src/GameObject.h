@@ -15,6 +15,7 @@ class GameObject
  public:
   GameObject (const char* = NULL, int = 0, int = 0, int = 0, int = 0, int = 0, int = 0);
   GameObject (SDL_Surface* = NULL, int = 0, int = 0, int = 0, int = 0, int = 0, int = 0);
+  inline virtual ~GameObject () {}
 
   virtual void Destroy ();
 

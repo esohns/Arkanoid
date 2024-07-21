@@ -38,18 +38,18 @@ endif ()
 add_executable (${PROJECT_NAME})
 
 target_include_directories (${PROJECT_NAME} PUBLIC
-                            $<BUILD_INTERFACE:${ACE_INCLUDE_DIR}>)
+                            "$<BUILD_INTERFACE:${ACE_INCLUDE_DIR}>")
 if (SDL_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              "$<BUILD_INTERFACE:${SDL_INCLUDE_DIRS}>")
  if (SDL1_USE)
   if (WIN32)
    target_include_directories (${PROJECT_NAME} PUBLIC
-                               $<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>)
+                               "$<BUILD_INTERFACE:${LIB_ROOT}/SDL_image/include>")
   endif (WIN32)
  elseif (SDL2_USE)
   target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:${SDL2_IMAGE_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${SDL2_IMAGE_INCLUDE_DIRS}>")
  endif ()
 endif (SDL_SUPPORT)
 
